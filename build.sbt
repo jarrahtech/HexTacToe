@@ -1,29 +1,33 @@
 import org.scalajs.linker.interface.ModuleSplitStyle
 
+ThisBuild / scalaVersion := "3.2.2"
+ThisBuild / organization := "com.jarrahtechnology"
+ThisBuild / versionScheme := Some("early-semver")
+
+Global / stQuiet := true
+
 lazy val hextactoe = project.in(file("."))
-  .enablePlugins(ScalaJSPlugin) // Enable the Scala.js plugin in this project
+  .enablePlugins(ScalaJSPlugin) 
+  .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
   .settings(
-    scalaVersion := "3.2.2",
+    name := "hextactoe",
+    version := "0.1.0",
 
-    // Tell Scala.js that this is an application with a main method
     scalaJSUseMainModuleInitializer := true,
-
-    /* Configure Scala.js to emit modules in the optimal way to
-     * connect to Vite's incremental reload.
-     * - emit ECMAScript modules
-     * - emit as many small modules as possible for classes in the "livechart" package
-     * - emit as few (large) modules as possible for all other classes
-     *   (in particular, for the standard library)
-     */
     scalaJSLinkerConfig ~= {
       _.withModuleKind(ModuleKind.ESModule)
         .withModuleSplitStyle(
           ModuleSplitStyle.SmallModulesFor(List("hextactoe")))
     },
+    externalNpm := baseDirectory.value,
 
-    /* Depend on the scalajs-dom library.
-     * It provides static types for the browser DOM APIs.
-     */
+    githubOwner := "jarrahtech",
+    githubRepository := "hex",
+
+    resolvers ++= Resolver.sonatypeOssRepos("public"),
+    resolvers += Resolver.githubPackages("jarrahtech"),
+
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.4.0",
     libraryDependencies += "com.raquo" %%% "laminar" % "15.0.1",
+    //libraryDependencies += ("com.lihaoyi" %%% "scalatags" % "0.12.0"),
   )
