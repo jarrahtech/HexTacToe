@@ -9,15 +9,19 @@ import org.scalajs.dom.window
 import typings.babylonjs.BABYLON.Material
 import org.scalajs.dom.SVGImageElement
 import concurrent.ExecutionContext.Implicits.global
+import typings.babylonjs.HTMLCanvasElement
+import typings.babylonjs.global.*
 
 @main
 def HexTacToe(): Unit = {
-  BABYLON.Effect.ShadersStore.addOne(("basicVertexShader", "precision highp float;attribute vec3 position;attribute vec2 uv;uniform mat4 worldViewProjection;varying vec2 vUV;void main(void){gl_Position=worldViewProjection*vec4(position,1.0);vUV =uv;}"))
-  BABYLON.Effect.ShadersStore.addOne(("unlitFragmentShader", "precision highp float;varying vec2 vUV;uniform sampler2D textureSampler;uniform vec3 color;uniform float opacity;void main(void){gl_FragColor=texture2D(textureSampler,vUV)*vec4(color,opacity);}"))
-
   renderOnDomContentLoaded(dom.document.getElementById("app"), Main.appElement())
   renderOnDomContentLoaded(dom.document.getElementById("test"), counterButton())
-  createBabylon()
+
+  val scene = createScene()
+  BabylonJsHelper.loadUnlitTransparentShader
+  dom.ext.Ajax.get("/hexagon_fill.svg").collect { _.responseText }.foreach(svg => {
+    BabylonJsHelper.drawSvg(scene, svg, Dimensions.square(256))
+  })
 }
 
 object Main {
@@ -26,7 +30,7 @@ object Main {
       a(href := "https://vitejs.dev", target := "_blank",
         img(src := "/vite.svg", className := "logo", alt := "Vite logo"),
       ),
-      img(src := "/binoculars_fill.svg", className := "logo", alt := "binoculars"),
+      img(src := "/hexagon_fill.svg", className := "logo", alt := "binoculars"),
       h1("Hello Laminar & Scala.js & Babylon & ScalablyTyped!"),
       div(idAttr := "test",
         className := "card",
@@ -48,34 +52,33 @@ def counterButton(): Element = {
     )
   }
 
-import typings.babylonjs.HTMLCanvasElement
-import typings.babylonjs.global.*
 
-@js.native @JSImport("/binoculars_fill.svg", JSImport.Default)
-val binocularsSvg: String = js.native
 
-def createBabylon() = {
+def createScene() = {
   val canvas = dom.document.getElementById("renderCanvas").asInstanceOf[typings.babylonjs.HTMLCanvasElement]
   val engine = new BABYLON.Engine(canvas, true) // Generate the BABYLON 3D engine
   val scene = new BABYLON.Scene(engine)
   val camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene)
   camera.setTarget(BABYLON.Vector3.Zero())
+  camera.attachControl(canvas, true)
   val light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene)
-  light.intensity = 0.7
-  val planeOptions = typings.babylonjs.anon.SourcePlane()
-  val plane = BABYLON.MeshBuilder.CreatePlane("plane", planeOptions, scene).asInstanceOf[BABYLON.Mesh]
-  drawSvgToMesh(plane, scene, binocularsSvg)
-  engine.runRenderLoop(()=>{ scene.render() })  
+  light.intensity = 1
 
+  engine.runRenderLoop(()=>{ scene.render() })  
   window.addEventListener("resize", _ => engine.resize())
   window.addEventListener("load", _ => engine.resize())
+  scene
 }
 
+/*
 import org.scalablytyped.runtime.StringDictionary
 import typings.babylonjs.anon.PartialIShaderMaterialOptAttributes
 
 def drawSvgToMesh(mesh: BABYLON.Mesh, scene: BABYLON.Scene, svgSrc: String) = {
-    val texture = BABYLON.DynamicTexture("svgTexture", 256, scene) 
+  val sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene)
+  sphere.position.y = 5
+  //val ground = BABYLON.Mesh.CreateGround("ground1", 6.0, 6.0, 2, scene)
+    val texture = BABYLON.DynamicTexture("svgTexture", 512, scene) 
     /* ALT: try AdvancedDynamicTexture: https://doc.babylonjs.com/typedoc/classes/BABYLON.GUI.AdvancedDynamicTexture - doesn't fix color, but may detect clicks? 
     var texture = typings.babylonjsGui.global.BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh(mesh, 256, 256, {}, false, {}, {})
     */
@@ -91,14 +94,19 @@ def drawSvgToMesh(mesh: BABYLON.Mesh, scene: BABYLON.Scene, svgSrc: String) = {
       .setUniformBuffersVarargs("worldViewProjection", "color", "opacity")
       .setSamplersVarargs("textureSampler")
     val mat = new BABYLON.ShaderMaterial("shader", scene, StringDictionary(("vertex", "basic"),("fragment", "unlit")), opts)
+    //val mat = new BABYLON.StandardMaterial("myMaterial", scene)
+    //mat.diffuseColor = new BABYLON.Color3(1, 0, 1)
+    //println("1")
+    //mat.diffuseTexture = new BABYLON.Texture("binoculars_fill.svg", scene, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+    //println("2")
     mat.setTexture("textureSampler", texture)
-    mat.setVector3("color", BABYLON.Vector3(0,1,0));
-    mat.setFloat("opacity", 0.7);
-    mat.alpha = 0 // need to set an alpha<1 so the transparent bg does not appear!
+    mat.setVector3("color", BABYLON.Vector3(1,1,1));
+    mat.setFloat("opacity", 1);
+    mat.alpha = 0.9 // need to set an alpha<1 so the transparent bg does not appear!
 
     texture.hasAlpha = true  
     mesh.material = mat
-
+    println(svgSrc)
     val img = Image()
     /* ALT: modify by changing svg directly!
     dom.ext.Ajax.get(binocularsSvg).collect { _.responseText }.foreach(svg => {
@@ -111,10 +119,11 @@ def drawSvgToMesh(mesh: BABYLON.Mesh, scene: BABYLON.Scene, svgSrc: String) = {
       }}
     })
     */
-    img.src = "/binoculars_fill.svg"
+    img.src = svgSrc
     img.onload = { (e: Event) => {
       textureContext.drawImage(img, 0, 0)
       texture.update()
+      println("done")
     }}
-
 }
+*/
