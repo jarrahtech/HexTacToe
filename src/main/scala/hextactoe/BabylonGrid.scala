@@ -9,8 +9,10 @@ import scalajs.js.Thenable.Implicits.thenable2future
 import concurrent.ExecutionContext.Implicits.global
 import com.jarrahtechnology.util.Vector2
 
+type HexModel = Option[Int]
+
 // TODO: should HexGridDisplay move in Babylon tools (from hex library)
-final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[Option[Int], C], meshes: List[List[BABYLON.Mesh]], val origin: Vector2) {
+final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel, C], meshes: List[List[BABYLON.Mesh]], val origin: Vector2) {
     def deriveBoundingBox = {
       val w = display.grid.coords.hexRadiiWidth*display.hexRadius/2d
       val h = display.grid.coords.hexRadiiHeight*display.hexRadius/2d
@@ -18,7 +20,10 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[Option[In
     }
 
     // TODO: util method for V2 conversion
-    def fromPixel(p: BABYLON.Vector3) = display.fromPixel(Vector2(p.x, p.y) subtract origin)
+    def fromPixel(p: BABYLON.Vector3) = {
+        val coord = display.fromPixel(Vector2(p.x, p.y) subtract origin)
+        display.grid.hexAt(coord).map((_, coord))
+    }
 }
 
 object BabylonGrid {

@@ -41,6 +41,13 @@ object BabylonJsHelper {
     mat
   }
 
+  import scalajs.js.Thenable.Implicits.thenable2future
+  import concurrent.ExecutionContext.Implicits.global
+  def load(path: String) = for {
+        response <- org.scalajs.dom.fetch("/hexagon.svg")
+        text <- response.text()
+    } yield text
+
   def svgWithDimensions(svg: String, resolution: Dimensions) = {
     val svgModified = svg.replace("__WIDTH__", resolution.width.toString).replace("__HEIGHT__", resolution.height.toString)
     s"data:image/svg+xml,${scala.scalajs.js.URIUtils.encodeURIComponent(svgModified)}" 
