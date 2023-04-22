@@ -9,6 +9,7 @@ import com.jarrahtechnology.util.Vector2
 final case class Dimensions(val width: Double, val height: Double) {
     def toOptions = StringDictionary(("width", width), ("height", height))
     def toPlane = typings.babylonjs.anon.SourcePlane.MutableBuilder(typings.babylonjs.anon.SourcePlane()).setWidth(width).setHeight(height)
+    def toVector2 = Vector2(width, height)
 }
 object Dimensions {
   def from(v: Vector2) = Dimensions(v.x, v.y)
@@ -60,7 +61,7 @@ object BabylonJsHelper {
     plane
   }
 
-  // TODO: move to hex library
+  // TODO: move to hex library?
   val root3 = math.sqrt(3)
   val flatTopHexPoints = List(Vector2(0, root3/4d), Vector2(0.25, root3/2d), Vector2(0.75, root3/2d), Vector2(1, root3/4d), Vector2(0.75, 0), Vector2(0.25, 0))
 

@@ -13,6 +13,7 @@ import concurrent.ExecutionContext.Implicits.global
 import typings.babylonjs.HTMLCanvasElement
 import typings.babylonjs.global.*
 import BabylonJsHelper._
+import typings.babylonjs.anon.Diameter
 
 @main
 def HexTacToe(): Unit = {
@@ -68,6 +69,9 @@ def createScene() = {
   val canvas = dom.document.getElementById("renderCanvas").asInstanceOf[typings.babylonjs.HTMLCanvasElement]
   val engine = new BABYLON.Engine(canvas, true) // Generate the BABYLON 3D engine
   val scene = new BABYLON.Scene(engine)
+  
+  val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.2), scene)
+
   val camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, -10), scene)
   camera.setTarget(BABYLON.Vector3.Zero())
   camera.attachControl(canvas, true)
