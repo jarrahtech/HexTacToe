@@ -6,11 +6,13 @@ import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
 import org.scalajs.dom.{Event, Image, SVGImageElement, XMLSerializer}
 import org.scalajs.dom.window
+import scalajs.js.Thenable.Implicits.thenable2future
 import typings.babylonjs.BABYLON.Material
 import org.scalajs.dom.SVGImageElement
 import concurrent.ExecutionContext.Implicits.global
 import typings.babylonjs.HTMLCanvasElement
 import typings.babylonjs.global.*
+import BabylonJsHelper._
 
 @main
 def HexTacToe(): Unit = {
@@ -18,10 +20,18 @@ def HexTacToe(): Unit = {
   renderOnDomContentLoaded(dom.document.getElementById("test"), counterButton())
 
   val scene = createScene()
-  BabylonJsHelper.loadUnlitTransparentShader
-  dom.ext.Ajax.get("/hexagon_fill.svg").collect { _.responseText }.foreach(svg => {
-    BabylonJsHelper.drawSvg(scene, svg, Dimensions.square(256))
-  })
+  loadUnlitTransparentShader
+  
+  /*val hex = for {
+    response <- dom.fetch("/hexagon.svg")
+    svg <- response.text()
+  } yield {
+    val resolution = Dimensions.square(256)
+    //drawSvg(scene, svgWithDimensions(svg, resolution), Dimensions.unitSquare, resolution)
+    
+  }*/
+  //drawHex(scene, 1024)
+  BabylonGrid.build(scene, Dimensions.square(3), 1)
 }
 
 object Main {
@@ -58,7 +68,7 @@ def createScene() = {
   val canvas = dom.document.getElementById("renderCanvas").asInstanceOf[typings.babylonjs.HTMLCanvasElement]
   val engine = new BABYLON.Engine(canvas, true) // Generate the BABYLON 3D engine
   val scene = new BABYLON.Scene(engine)
-  val camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene)
+  val camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, -10), scene)
   camera.setTarget(BABYLON.Vector3.Zero())
   camera.attachControl(canvas, true)
   val light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene)

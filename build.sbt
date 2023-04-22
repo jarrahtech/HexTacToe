@@ -13,6 +13,12 @@ lazy val hextactoe = project.in(file("."))
     name := "hextactoe",
     version := "0.1.0",
 
+    scalacOptions ++= Seq(
+      "-encoding", "utf8",
+      "-Xfatal-warnings",
+      "-deprecation",
+    ),
+
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= {
       _.withModuleKind(ModuleKind.ESModule)
@@ -29,5 +35,6 @@ lazy val hextactoe = project.in(file("."))
 
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.4.0",
     libraryDependencies += "com.raquo" %%% "laminar" % "15.0.1",
+    libraryDependencies += "com.jarrahtechnology" %%% "hex" % "0.3.0",
     //libraryDependencies += ("com.lihaoyi" %%% "scalatags" % "0.12.0"),
   )
