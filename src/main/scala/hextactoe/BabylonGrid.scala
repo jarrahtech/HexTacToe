@@ -2,14 +2,22 @@ package hextactoe
 
 import scala.util.chaining._
 import com.jarrahtechnology.hex.*
+import com.jarrahtechnology.hex.Direction._
 import BabylonJsHelper._
 import typings.babylonjs.global.*
 import org.scalajs.dom
 import scalajs.js.Thenable.Implicits.thenable2future
 import concurrent.ExecutionContext.Implicits.global
-import com.jarrahtechnology.util.Vector2
+import com.jarrahtechnology.util.Vector2    
 
 type HexModel = Option[Int]
+
+val lines = List(DirectionPath(List(None, Some(North), Some(North))),
+                DirectionPath(List(None, Some(NorthWest), Some(NorthWest))),
+                DirectionPath(List(None, Some(SouthWest), Some(SouthWest))),
+                DirectionPath(List(None, Some(South), Some(South))),
+                DirectionPath(List(None, Some(SouthEast), Some(SouthEast))),
+                DirectionPath(List(None, Some(NorthEast), Some(NorthEast))))
 
 // TODO: should HexGridDisplay move in Babylon tools (from hex library)
 final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel, C], meshes: List[List[BABYLON.Mesh]], val origin: Vector2) {
@@ -20,10 +28,21 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
     }
 
     // TODO: util method for V2 conversion
-    def fromPixel(p: BABYLON.Vector3) = {
+    def fromPixel(p: BABYLON.Vector3): Option[(HexModel, Coord)] = {
         val coord = display.fromPixel(Vector2(p.x, p.y) subtract origin)
-        display.grid.hexAt(coord).map((_, coord))
+        display.grid.hexAt(display.fromPixel(Vector2(p.x, p.y) subtract origin)).map((_, coord))
     }
+
+    // TODO: use generics so don't need to cast here!
+    def claim(actor: Actor, c: Coord) = {
+        display.grid.asInstanceOf[MutableRectangularHexGrid[HexModel, C]].set(c, Some(actor.id))
+        meshes(c.column)(c.row).material.asInstanceOf[BABYLON.ShaderMaterial].setVector3("color", colorToVector3(actor.colour))
+    }
+
+    def isDraw = display.grid.filter(_._2.isEmpty).isEmpty
+    val linePaths = lines.map(_.toPath(display.grid))
+    def winner: Option[Int] = display.grid.find((c, h) => xInLine(c, h.getOrElse(-1), 3)).flatMap(_._2)
+    def xInLine(c: Coord, id: Int, x: Int) = linePaths.map(_(c)).exists(_.map(_.filter(_._2.getOrElse(-1)==id).length).getOrElse(0)==x)
 }
 
 object BabylonGrid {
@@ -33,7 +52,7 @@ object BabylonGrid {
     def build(scene: BABYLON.Scene, sizeInHexes: Dimensions, hexRadius: Double) = {
       // TODO: have builders that take width/height as one parameter?
       val coords = CoordSystem.evenVertical
-      val model = RectangularHexGrid.immutable(coords, sizeInHexes.width.toInt-1, sizeInHexes.height.toInt-1, (x,y) => Option.empty[Int])
+      val model = RectangularHexGrid.mutable(coords, sizeInHexes.width.toInt-1, sizeInHexes.height.toInt-1, (x,y) => Option.empty[Int])
       val display = HexGridDisplay(model, hexRadius)
       val dim = Dimensions.from(model.coords.hexRadiiDimensions.multiply(hexRadius))  
       // TODO: be able to map over hexes with Coords? and then replace below
