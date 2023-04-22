@@ -15,10 +15,19 @@ import typings.babylonjs.global.*
 import BabylonJsHelper._
 import typings.babylonjs.anon.Diameter
 
+val playerColour = "#87CEEB"
+val opponentColor = "#FFFF00"
+val yourTurn = div("It is ", span(whiteSpace := "nowrap", color := playerColour, "your"), " turn, click the hex you want to claim.")
+val opponentTurn = div("It is your ", span(whiteSpace := "nowrap", color := opponentColor, "opponent"), "'s turn.")
+
+def renderYourTurn = render(dom.document.getElementById("turn"), yourTurn)
+def renderOppenentTurn = render(dom.document.getElementById("turn"), opponentTurn)
+
 @main
 def HexTacToe(): Unit = {
-  renderOnDomContentLoaded(dom.document.getElementById("app"), Main.appElement())
-  renderOnDomContentLoaded(dom.document.getElementById("test"), counterButton())
+  renderYourTurn
+  //renderOnDomContentLoaded(dom.document.getElementById("turn"), yourTurn)
+  //renderOnDomContentLoaded(dom.document.getElementById("test"), counterButton())
 
   val (scene, camera) = createScene()
   loadUnlitTransparentShader
@@ -33,7 +42,7 @@ def HexTacToe(): Unit = {
     
   }*/
   //drawHex(scene, 1024)
-  val grid = BabylonGrid.build(scene, Dimensions.square(3), 1)
+  val grid = BabylonGrid.build(scene, Dimensions.square(3), 0.75)
   scene.onPointerDown = (_, _, _) => {
     val ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), camera, false)
     val hit = scene.pickWithRay(ray)
@@ -47,6 +56,7 @@ def HexTacToe(): Unit = {
   } 
 }
 
+/*
 object Main {
   def appElement(): Element = {
     div(
@@ -74,17 +84,17 @@ def counterButton(): Element = {
       onClick --> { event => counter.update(c => c + 1) },
     )
   }
-
-
+*/
 
 def createScene() = {
   val canvas = dom.document.getElementById("renderCanvas").asInstanceOf[typings.babylonjs.HTMLCanvasElement]
   val engine = new BABYLON.Engine(canvas, true) // Generate the BABYLON 3D engine
   val scene = new BABYLON.Scene(engine)
+  scene.clearColor = BABYLON.Color4(0,0,0,1)
   //val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.2), scene)
   val camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, -10), scene)
   camera.setTarget(BABYLON.Vector3.Zero())
-  camera.attachControl(canvas, true)
+  //camera.attachControl(canvas, true)
   val light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene)
   light.intensity = 1
 
