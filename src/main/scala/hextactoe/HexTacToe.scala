@@ -20,10 +20,11 @@ def HexTacToe(): Unit = {
   renderOnDomContentLoaded(dom.document.getElementById("app"), Main.appElement())
   renderOnDomContentLoaded(dom.document.getElementById("test"), counterButton())
 
-  val scene = createScene()
+  val (scene, camera) = createScene()
   loadUnlitTransparentShader
   
-  /*val hex = for {
+  /* loading a file
+  val hex = for {
     response <- dom.fetch("/hexagon.svg")
     svg <- response.text()
   } yield {
@@ -32,7 +33,18 @@ def HexTacToe(): Unit = {
     
   }*/
   //drawHex(scene, 1024)
-  BabylonGrid.build(scene, Dimensions.square(3), 1)
+  val grid = BabylonGrid.build(scene, Dimensions.square(3), 1)
+  scene.onPointerDown = (_, _, _) => {
+    val ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), camera, false)
+    val hit = scene.pickWithRay(ray)
+    hit.pickedPoint match {
+      case pt: BABYLON.Vector3 => {
+        val c = grid.fromPixel(pt)
+        println(s"${hit.pickedPoint} -> $c")
+      }
+      case _ => {}
+    }
+  } 
 }
 
 object Main {
@@ -69,9 +81,7 @@ def createScene() = {
   val canvas = dom.document.getElementById("renderCanvas").asInstanceOf[typings.babylonjs.HTMLCanvasElement]
   val engine = new BABYLON.Engine(canvas, true) // Generate the BABYLON 3D engine
   val scene = new BABYLON.Scene(engine)
-  
-  val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.2), scene)
-
+  //val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.2), scene)
   val camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, -10), scene)
   camera.setTarget(BABYLON.Vector3.Zero())
   camera.attachControl(canvas, true)
@@ -80,8 +90,8 @@ def createScene() = {
 
   engine.runRenderLoop(()=>{ scene.render() })  
   window.addEventListener("resize", _ => engine.resize())
-  window.addEventListener("load", _ => engine.resize())
-  scene
+  window.addEventListener("load", _ => engine.resize()) 
+  (scene, camera)
 }
 
 /*

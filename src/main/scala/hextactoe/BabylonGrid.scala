@@ -10,14 +10,15 @@ import concurrent.ExecutionContext.Implicits.global
 import com.jarrahtechnology.util.Vector2
 
 // TODO: should HexGridDisplay move in Babylon tools (from hex library)
-final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[Option[Int], C], meshes: List[List[BABYLON.Mesh]]) {
+final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[Option[Int], C], meshes: List[List[BABYLON.Mesh]], val origin: Vector2) {
     def deriveBoundingBox = {
       val w = display.grid.coords.hexRadiiWidth*display.hexRadius/2d
       val h = display.grid.coords.hexRadiiHeight*display.hexRadius/2d
       (-w+display.grid.coords.rectangularGridRadiiWidth(meshes.size, meshes(0).size), -w, -h+display.grid.coords.rectangularGridRadiiHeight(meshes.size, meshes(0).size), -h);
     }
 
-    val origin = BabylonGrid.calcRadiiOrigin
+    // TODO: util method for V2 conversion
+    def fromPixel(p: BABYLON.Vector3) = display.fromPixel(Vector2(p.x, p.y) subtract origin)
 }
 
 object BabylonGrid {
@@ -35,7 +36,7 @@ object BabylonGrid {
       val origin = calcRadiiOrigin(coords, sizeInHexes) multiply hexRadius
       BabylonGrid(display, (0 until sizeInHexes.width.toInt).toList.map(c => (0 until sizeInHexes.height.toInt).toList.map(r => {
         drawTexture(scene, dim, hexTexture).tap(_.position = projectFlatToBabylon3D(origin add display.toPixel(Coord(c, r))))
-      })))
+      })), origin)
     }
 
     // TODO: V2 & V3 can convert to typings.babylonjs.BABYLON.{V2, V3} and project
