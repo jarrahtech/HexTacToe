@@ -1,11 +1,10 @@
-package tween
+package com.jarrahtechnology.kassite.tween
 
 import com.jarrahtechnology.util.Math._
 import typings.babylonjs.global.*
 
 import scala.collection.mutable.HashSet
 import scala.concurrent.duration._
-import tween._
 
 trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, tween: Double => Unit, val loop: LoopType, val delay: Duration, val ease: EaseType, val onFinish: Option[T => Unit]) {
   require(duration>Duration.Zero, s"duration=${duration} !> 0")
@@ -25,8 +24,13 @@ final class Tween(val params: TweenParameters[_], val manager: TweenManager) {
   def pause = timeScale = 0
   def unpause = timeScale = 1
   def isPaused = timeScale==0 || manager.isPaused
+  def isStopped = !manager.manages(this)
   def stop = { params.fireFinished; manager.remove(this) }
   def restart = { runTime = -params.delay; if (!manager.manages(this)) manager.run(this); this } 
+  def syncTo(other: Tween) = { 
+    runTime = params.duration * LoopType.loopForwardFromStart(other.params.duration)(other.runTime)
+    timeScale = other.timeScale
+  }
 }
 
 final class TweenManager(scene: BABYLON.Scene) {
@@ -38,7 +42,7 @@ final class TweenManager(scene: BABYLON.Scene) {
     tweens.foreach(_.update(delta))
   })
 
-  def run(t: Tween): Tween = { tweens.add(t); t }
+  def run(t: Tween): Tween = { if (t.manager == this) tweens.add(t); t }
   def run(params: TweenParameters[_]): Tween = run(Tween(params, this))
   def remove(tween: Tween) = tweens.remove(tween)
   def manages(tween: Tween) = tweens.exists(_ == tween)

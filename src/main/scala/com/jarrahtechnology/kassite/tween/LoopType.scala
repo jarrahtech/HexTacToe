@@ -1,4 +1,4 @@
-package tween
+package com.jarrahtechnology.kassite.tween
 
 import scala.concurrent.duration._
 import com.jarrahtechnology.util.Math._

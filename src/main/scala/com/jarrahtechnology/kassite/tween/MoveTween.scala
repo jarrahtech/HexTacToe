@@ -1,4 +1,4 @@
-package tween
+package com.jarrahtechnology.kassite.tween
 
 import typings.babylonjs.global.*
 import scala.concurrent.duration._

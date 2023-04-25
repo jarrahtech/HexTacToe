@@ -12,6 +12,8 @@ import typings.babylonjs.global.*
 import BabylonJsHelper._
 import typings.babylonjs.anon.Diameter
 import com.jarrahtechnology.hex.*
+import scala.concurrent.duration._
+import com.jarrahtechnology.kassite.tween._
 
 final case class Actor(val id: Int, val colour: BABYLON.Color3)
 val player = Actor(0, BABYLON.Color3(0, 0.75, 1))
@@ -26,9 +28,6 @@ val draw = "Draw"
 def renderTurn(who: String) = dom.document.getElementById("turn").innerHTML = who
 
 var isPlayerTurn = true
-
-import scala.concurrent.duration._
-import tween._
 
 @main
 def HexTacToe(): Unit = {

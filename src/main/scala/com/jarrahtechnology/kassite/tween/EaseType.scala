@@ -1,4 +1,4 @@
-package tween
+package com.jarrahtechnology.kassite.tween
 
 import com.jarrahtechnology.util.Math._
 
