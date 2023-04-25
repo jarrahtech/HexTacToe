@@ -41,6 +41,9 @@ def HexTacToe(): Unit = {
       case _ => {}
     }
   } 
+  val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.5), scene).asInstanceOf[BABYLON.Mesh]
+  val tweens = TweenManager(scene)
+  tweens.move(1000, origin, BABYLON.Vector3(0, 0, 0), BABYLON.Vector3(2, 0, 0))
 }
 
 def colorToVector3(c: BABYLON.Color3) = BABYLON.Vector3(c.r, c.g, c.b)
@@ -81,7 +84,6 @@ def createScene() = {
   val engine = new BABYLON.Engine(canvas, true) // Generate the BABYLON 3D engine
   val scene = new BABYLON.Scene(engine)
   scene.clearColor = BABYLON.Color4(0,0,0,1)
-  //val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.2), scene)
   val camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, -10), scene)
   camera.setTarget(BABYLON.Vector3.Zero())
   //camera.attachControl(canvas, true)
