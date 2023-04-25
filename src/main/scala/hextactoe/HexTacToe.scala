@@ -28,6 +28,7 @@ def renderTurn(who: String) = dom.document.getElementById("turn").innerHTML = wh
 var isPlayerTurn = true
 
 import scala.concurrent.duration._
+import tween._
 
 @main
 def HexTacToe(): Unit = {
