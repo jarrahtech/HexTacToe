@@ -1,11 +1,16 @@
 package hextactoe
 
-enum LoopType(val progress: Double => Double => Double, val hasFinished: Double => Double => Boolean) {
+import scala.concurrent.duration._
+import math.Integral.Implicits.infixIntegralOps
+
+def durationMod(x: Duration, divisor: Duration) = Duration(x.toNanos%divisor.toNanos, NANOSECONDS) 
+
+enum LoopType(val progress: Duration => Duration => Double, val hasFinished: Duration => Duration => Boolean) {
   case Once extends LoopType(duration => runTime => runTime/duration, duration => runTime => runTime>=duration)
   // reverse?
-  case Cycle extends LoopType(duration => runTime => (runTime%duration)/duration, _ => _ => false)
+  case Cycle extends LoopType(duration => runTime => durationMod(runTime, duration)/duration, _ => _ => false)
   case PingPong extends LoopType(duration => runTime => {
-    val runPercent = (runTime%duration)/duration
+    val runPercent = durationMod(runTime, duration)/duration
     if (math.floor(runTime/duration) % 2 == 0) runPercent // forward
     else 1-runPercent // backward
   }, _ => _ => false)
@@ -39,16 +44,15 @@ enum EaseMethod(val easeFn: Interpolator) {
 
 import com.jarrahtechnology.util.Math._
 
-// TODO: replace "time" in names with time unit - once known
-final class Tween(val duration: Double, val loop: LoopType, val delay: Double, ease: EaseMethod, tween: Double => Unit, onFinish: Tween => Unit, val manager: TweenManager) {
-  require(duration>0, s"duration=${duration} !> 0")
+final class Tween(val duration: Duration, val loop: LoopType, val delay: Duration, ease: EaseMethod, tween: Double => Unit, onFinish: Tween => Unit, val manager: TweenManager) {
+  require(duration>Duration.Zero, s"duration=${duration} !> 0")
 
   private var runTime = -delay
   private var mult = 1d
   val updateTweenWith = loop.progress(duration) andThen clamp01 andThen ease.easeFn andThen tween
   val hasFinishedAfter = loop.hasFinished(duration)
 
-  def update(deltaTime: Double) = {runTime += deltaTime*mult; updateTweenWith(runTime); if (hasFinishedAfter(runTime)) stop }
+  def update(delta: Duration) = {runTime = runTime + delta*mult; updateTweenWith(runTime); if (hasFinishedAfter(runTime)) stop }
   def progressTime = runTime
   def pause = mult = 0
   def unpause = mult = 1
@@ -65,7 +69,8 @@ final class TweenManager(scene: BABYLON.Scene) {
   private var mult = 1d
 
   scene.onBeforeRenderObservable.add((sc, ev) => {
-    tweens.foreach(_.update(scene.deltaTime))
+    val delta = Duration(scene.deltaTime.toLong, MILLISECONDS)
+    tweens.foreach(_.update(delta))
   })
 
   private def add(tween: Tween) = if (!manages(tween) && tween.manager==this) tweens.add(tween)
@@ -79,8 +84,8 @@ final class TweenManager(scene: BABYLON.Scene) {
   def unpause = mult = 1
   def isPaused = mult==0
 
-  def move(d: Double, mesh: BABYLON.Mesh, origin: BABYLON.Vector3, dest: BABYLON.Vector3) = 
-    add(Tween(d, LoopType.Cycle, 0, EaseMethod.Spring, v => mesh.position = v3lerp(v, origin, dest), _ => println("done move"), this))
+  def move(d: Duration, mesh: BABYLON.Mesh, origin: BABYLON.Vector3, dest: BABYLON.Vector3) = 
+    add(Tween(d, LoopType.PingPong, Duration.Zero, EaseMethod.InBounce, v => mesh.position = v3lerp(v, origin, dest), _ => println("done move"), this))
 }
 
 type Interpolator = Double => Double

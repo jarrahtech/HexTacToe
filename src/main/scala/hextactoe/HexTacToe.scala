@@ -27,6 +27,8 @@ def renderTurn(who: String) = dom.document.getElementById("turn").innerHTML = wh
 
 var isPlayerTurn = true
 
+import scala.concurrent.duration._
+
 @main
 def HexTacToe(): Unit = {
   renderTurn(yourTurn)
@@ -43,7 +45,7 @@ def HexTacToe(): Unit = {
   } 
   val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.5), scene).asInstanceOf[BABYLON.Mesh]
   val tweens = TweenManager(scene)
-  tweens.move(1000, origin, BABYLON.Vector3(0, 0, 0), BABYLON.Vector3(2, 0, 0))
+  tweens.move(Duration(1, SECONDS), origin, BABYLON.Vector3(0, 0, 0), BABYLON.Vector3(2, 0, 0))
 }
 
 def colorToVector3(c: BABYLON.Color3) = BABYLON.Vector3(c.r, c.g, c.b)
