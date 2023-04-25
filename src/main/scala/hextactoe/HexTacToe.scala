@@ -46,7 +46,7 @@ def HexTacToe(): Unit = {
 
   val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.5), scene).asInstanceOf[BABYLON.Mesh]
   val tweens = TweenManager(scene)
-  MoveTween.linear(Duration(2, SECONDS), origin, BABYLON.Vector3(2, 0, 0)).run(tweens)
+  MoveTween.linear(Duration(2, SECONDS), origin, BABYLON.Vector3(4, 0, 0)).run(tweens)
 }
 
 def colorToVector3(c: BABYLON.Color3) = BABYLON.Vector3(c.r, c.g, c.b)

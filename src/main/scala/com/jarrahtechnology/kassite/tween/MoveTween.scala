@@ -4,7 +4,7 @@ import typings.babylonjs.global.*
 import scala.concurrent.duration._
 
 final case class LinearMoveTweenParameters(d: Duration, val mesh: BABYLON.Mesh, val dest: BABYLON.Vector3, val origin: BABYLON.Vector3) 
-  extends TweenParameters[LinearMoveTweenParameters](d, v => mesh.position = MoveTween.v3lerp(v, origin, dest), LoopType.Repeat(3), Duration.Zero, EaseType.InBounce, None)
+  extends TweenParameters[LinearMoveTweenParameters](d, v => mesh.position = MoveTween.v3lerp(v, origin, dest), LoopType.Cycle, EaseType.Sigmoid, Duration.Zero, None)
 
 object MoveTween {
   def linear(duration: Duration, mesh: BABYLON.Mesh, dest: BABYLON.Vector3) = LinearMoveTweenParameters(duration, mesh, dest, mesh.position.asInstanceOf[BABYLON.Vector3])

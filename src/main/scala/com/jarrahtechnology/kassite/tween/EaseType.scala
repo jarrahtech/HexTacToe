@@ -2,25 +2,39 @@ package com.jarrahtechnology.kassite.tween
 
 import com.jarrahtechnology.util.Math._
 
-trait EaseType(val fn: Interpolator)
+trait EaseType(val method: Interpolator)
 
 object EaseType {
+  def reverse(other: Interpolator): Interpolator = v => 1-other(1-v)
+  def inOut(in: Interpolator): Interpolator = v => if (v<=0.5d) in(v*2d)/2d else (reverse(in)(v*2d-1d)+1d)/2d
+  def outIn(in: Interpolator): Interpolator = v => if (v<=0.5d) reverse(in)(v*2d)/2d else (in(v*2d-1d)+1d)/2d
+
   case object Linear extends EaseType(identity)
   case object Spring extends EaseType(springInterp)
-  case object Sigmoid extends EaseType(eInterp(0.2))
-  case object Punch extends EaseType(eInterp(0.1))
-  case object InQuad extends EaseType(powerInterp(2))
-  case object OutQuad extends EaseType(reverseInterp(InQuad.fn))
-  case object InCubic extends EaseType(powerInterp(3))
-  case object OutCubic extends EaseType(reverseInterp(InCubic.fn))
-  case object InQuart extends EaseType(powerInterp(4))
-  case object OutQuart extends EaseType(reverseInterp(InQuart.fn))
-  case object InSin extends EaseType(sinInterp)
-  case object OutSin extends EaseType(reverseInterp(InSin.fn))
-  case object InBounce extends EaseType(bounceInterp)
-  case object OutBounce extends EaseType(reverseInterp(InBounce.fn))
+  case object OutInSpring extends EaseType(outIn(Spring.method))
 
-  // TODO: ease in/out, interp curves
+  case object Sigmoid extends EaseType(eInterp(0.2))
+  case object SteepSigmoid extends EaseType(eInterp(0.1))
+
+  case object InQuad extends EaseType(powerInterp(2))
+  case object OutQuad extends EaseType(reverse(InQuad.method))
+  case object InOutQuad extends EaseType(inOut(InQuad.method))
+  case object OutInQuad extends EaseType(outIn(InQuad.method))
+
+  case object InCubic extends EaseType(powerInterp(3))
+  case object OutCubic extends EaseType(reverse(InCubic.method))
+
+  case object InQuart extends EaseType(powerInterp(4))
+  case object OutQuart extends EaseType(reverse(InQuart.method))
+  case object InOutQuart extends EaseType(inOut(InQuart.method))
+
+  case object InSin extends EaseType(sinInterp)
+  case object OutSin extends EaseType(reverse(InSin.method))
+
+  case object InBounce extends EaseType(bounceInterp)
+  case object OutBounce extends EaseType(reverse(InBounce.method))
+  
+  // TODO: interp curves
 }
 
 // TODO: here down should be in util (and used in InterpGraph too)
@@ -28,9 +42,6 @@ type Interpolator = Double => Double
 
 def interp(interpFn: Interpolator)(value: Double, lower: Double, upper: Double) = (upper - lower) * interpFn(clamp01(value)) + lower
 def lerp = interp(identity)
-
-def reverseInterp(other: Interpolator): Interpolator = v => 1-other(1-v)
-
 def powerInterp(power: Int): Interpolator = { require(power>0, s"power=${power} !>0"); math.pow(_, power) }
 def eInterp(k: Double): Interpolator = v => { require(k>0, s"k=${k} !>0"); 1-1/(1+math.pow(math.E, (v*2-1)/k)) }
 def circInterp: Interpolator = v => math.sqrt(1 - v * v) - 1

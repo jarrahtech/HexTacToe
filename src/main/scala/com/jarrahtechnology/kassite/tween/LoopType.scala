@@ -21,7 +21,7 @@ object LoopType {
 
   case object Once extends LoopType(forward, stopAfterDuration)
   final case class Repeat(val times: Int) extends LoopType(loopForwardFromStart, stopAfterRepeating(times))
-  final case class Reverse() extends LoopType(reverse, stopAfterDuration)
-  final case class Cycle() extends LoopType(loopForwardFromStart, runForever)
-  final case class PingPong() extends LoopType(loopForwardThenReverse, runForever)
+  case object Reverse extends LoopType(reverse, stopAfterDuration)
+  case object Cycle extends LoopType(loopForwardFromStart, runForever)
+  case object PingPong extends LoopType(loopForwardThenReverse, runForever)
 }

@@ -6,10 +6,10 @@ import typings.babylonjs.global.*
 import scala.collection.mutable.HashSet
 import scala.concurrent.duration._
 
-trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, tween: Double => Unit, val loop: LoopType, val delay: Duration, val ease: EaseType, val onFinish: Option[T => Unit]) {
+trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, action: Double => Unit, val loop: LoopType, val ease: EaseType, val delay: Duration, val onFinish: Option[T => Unit]) {
   require(duration>Duration.Zero, s"duration=${duration} !> 0")
 
-  val updateTweenWith = loop.progress(duration) andThen clamp01 andThen ease.fn andThen tween
+  val updateTweenWith = loop.progress(duration) andThen clamp01 andThen ease.method andThen action
   val hasFinishedAfter = loop.hasFinished(duration)
   def fireFinished = onFinish.foreach(_(this.asInstanceOf[T]))
   def run(manager: TweenManager) = manager.run(this)
