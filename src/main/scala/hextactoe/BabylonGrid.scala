@@ -78,12 +78,3 @@ object BabylonGrid {
       (shift add c.hexRadiiDimensions subtract c.rectangularGridRadiiDimensions(sizeInHexes.width.toInt, sizeInHexes.height.toInt)) divide 2f
     }
 }
-
-/* TODO: tweens
-
-scene.onBeforeRenderObservable(function () {
-  //Your code here https://playground.babylonjs.com/#835Y0X
-});
-scene.getAnimationRatio
-https://forum.babylonjs.com/t/how-to-use-delta-time/27501/2
-*/
