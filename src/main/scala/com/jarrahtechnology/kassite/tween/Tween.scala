@@ -12,7 +12,7 @@ trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, action: D
   val updateTweenWith = loop.progress(duration) andThen clamp01 andThen ease.method andThen action
   val hasFinishedAfter = loop.hasFinished(duration)
   def fireFinished = onFinish.foreach(_(this.asInstanceOf[T]))
-  def run(manager: TweenManager) = manager.run(this)
+  def runOn(manager: TweenManager) = manager.run(this)
 }
 
 final class Tween(val params: TweenParameters[_], val manager: TweenManager) {

@@ -12,8 +12,6 @@ import typings.babylonjs.global.*
 import BabylonJsHelper._
 import typings.babylonjs.anon.Diameter
 import com.jarrahtechnology.hex.*
-import scala.concurrent.duration._
-import com.jarrahtechnology.kassite.tween._
 
 final case class Actor(val id: Int, val colour: BABYLON.Color3)
 val player = Actor(0, BABYLON.Color3(0, 0.75, 1))
@@ -44,9 +42,20 @@ def HexTacToe(): Unit = {
     }
   } 
 
-  val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.5), scene).asInstanceOf[BABYLON.Mesh]
-  val tweens = TweenManager(scene)
-  MoveTween.linear(Duration(2, SECONDS), origin, BABYLON.Vector3(4, 0, 0)).run(tweens)
+  //import com.jarrahtechnology.kassite._
+  //val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.5), scene).asInstanceOf[BABYLON.Mesh]
+  //val o = typings.babylonjs.anon.SourcePlane.MutableBuilder(typings.babylonjs.anon.SourcePlane()).setWidth(128).setHeight(128)
+  //val plane = BABYLON.MeshBuilder.CreatePlane("plane", o, scene).asInstanceOf[BABYLON.Mesh]
+  //val s = Shaders.unlitTransparent.set(("opacity"->Some(0.99)),("color"->Some(BABYLON.Color3(0,0,1))),("tex"->Some(drawFlatTopHexTexture(scene, 64))))
+  //val mat = ParameterisedShaderMaterial("mat", scene, s)
+  //mat.underlying.alpha = 0.99 // <1 so bg disappears
+  //plane.material = mat.underlying
+  //mat.set("color", BABYLON.Color3(1,0,0))
+  //println(s"oo ${mat.get("tex")}")
+  //import scala.concurrent.duration._
+  //import com.jarrahtechnology.kassite.tween._
+  //val tweens = TweenManager(scene)
+  //MoveTween.linear(Duration(2, SECONDS), origin, BABYLON.Vector3(4, 0, 0)).run(tweens)
 }
 
 def colorToVector3(c: BABYLON.Color3) = BABYLON.Vector3(c.r, c.g, c.b)

@@ -5,6 +5,7 @@ import org.scalablytyped.runtime.StringDictionary
 import typings.babylonjs.global.*
 import typings.babylonjs.anon.PartialIShaderMaterialOptAttributes
 import com.jarrahtechnology.util.Vector2
+import com.jarrahtechnology.kassite.tween.MaterialTween
 
 final case class Dimensions(val width: Double, val height: Double) {
     def toOptions = StringDictionary(("width", width), ("height", height))
@@ -26,8 +27,8 @@ object BabylonJsHelper {
 
   val unlitTransparentShaderPath = StringDictionary(("vertex", "basic"),("fragment", "unlit"))
   val unlitTransparentShaderOpts = PartialIShaderMaterialOptAttributes.MutableBuilder(PartialIShaderMaterialOptAttributes())
-        .setAttributesVarargs("position", "uv")
-        .setUniformBuffersVarargs("worldViewProjection", "color", "opacity")
+        //.setAttributesVarargs("position", "uv")
+        .setUniformBuffersVarargs("color", "opacity")
         .setSamplersVarargs("textureSampler")
 
   val nullPlaneOptions = typings.babylonjs.anon.SourcePlane()
@@ -35,7 +36,7 @@ object BabylonJsHelper {
   def unlitTransparentMaterial(scene: BABYLON.Scene, texture: BABYLON.DynamicTexture) = {
     val mat = BABYLON.ShaderMaterial("shader", scene, unlitTransparentShaderPath, unlitTransparentShaderOpts)
     mat.setTexture("textureSampler", texture)
-    mat.setVector3("color", BABYLON.Vector3(1,1,1));
+    mat.setColor3("color", BABYLON.Color3(1,1,1));
     mat.setFloat("opacity", 1);
     mat.alpha = 0.99 // <1 so bg disappears
     mat
@@ -44,7 +45,7 @@ object BabylonJsHelper {
   import scalajs.js.Thenable.Implicits.thenable2future
   import concurrent.ExecutionContext.Implicits.global
   def load(path: String) = for {
-        response <- org.scalajs.dom.fetch("/hexagon.svg")
+        response <- org.scalajs.dom.fetch(path)
         text <- response.text()
     } yield text
 
@@ -90,14 +91,30 @@ object BabylonJsHelper {
     texture
    }
 
+   def drawFillTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture = {
+    val texture = BABYLON.DynamicTexture("svgTexture", StringDictionary(("width", 2), ("height", 2)), scene, true)
+    texture.hasAlpha = true 
+    val ctx = texture.getContext()
+    ctx.fillStyle = "white"
+    ctx.fill()
+    texture.update()
+    texture
+   }
+
   def drawTexture(scene: BABYLON.Scene, dimensions: Dimensions, texture: BABYLON.DynamicTexture): BABYLON.Mesh = {
     val plane = BABYLON.MeshBuilder.CreatePlane("plane", dimensions.toPlane, scene).asInstanceOf[BABYLON.Mesh]
     val mat = BABYLON.ShaderMaterial("shader", scene, unlitTransparentShaderPath, unlitTransparentShaderOpts)
     mat.setTexture("textureSampler", texture)
-    mat.setVector3("color", BABYLON.Vector3(1,1,1))
+    mat.setColor3("color", BABYLON.Color3.White())// BABYLON.Vector3(1,1,1))
     mat.setFloat("opacity", 0.9)
     mat.alpha = 0.9 
     plane.material = mat
+
+    import scala.concurrent.duration._
+    import com.jarrahtechnology.kassite.tween._
+    val tweenMgr = TweenManager(scene)
+    //MoveTween.linear(Duration(2, SECONDS), origin, BABYLON.Vector3(4, 0, 0)).run(tweens)
+    MaterialTween.shaderColor3Parameter(Duration(500, MILLISECONDS), mat, "color", BABYLON.Color3(1, 1, 1), player.colour).runOn(tweenMgr)
     plane
   }
 }

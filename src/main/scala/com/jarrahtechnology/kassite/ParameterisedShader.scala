@@ -4,6 +4,7 @@ import org.scalablytyped.runtime.StringDictionary
 import typings.babylonjs.anon.PartialIShaderMaterialOptAttributes
 import typings.babylonjs.global.*
 import scala.scalajs.js.Array
+import collection.Map
 
 /*
 def loadUnlitTransparentShader = {
@@ -34,11 +35,9 @@ object Shaders {
     import com.jarrahtechnology.kassite.ShaderType._
     import com.jarrahtechnology.kassite.ShaderParamType._
 
-    lazy val unlitTransparent = ParameterisedShader(
-        SubShader("basic2", Vertex, "precision highp float;attribute vec3 position;attribute vec2 uv;uniform mat4 worldViewProjection;varying vec2 vUV;void main(void){gl_Position=worldViewProjection*vec4(position,1.0);vUV =uv;}",
-                  Set.empty[ShaderParam[_]]),
-        SubShader("unlit2", Fragment, "precision highp float;varying vec2 vUV;uniform sampler2D tex;uniform vec3 color;uniform float opacity;void main(void){gl_FragColor=texture2D(tex,vUV)*vec4(color,opacity);}",
-                  Set(ShaderParam("color", Uniform, Some(BABYLON.Color3.White())), ShaderParam("opacity", Uniform, Some(0.9d)), ShaderParam("tex", Uniform, Option.empty[BABYLON.Texture])))
+    lazy val unlitTransparent = ParameterisedShader.derive(
+        SubShader("basic2", Vertex, Map.empty, "precision highp float;attribute vec3 position;attribute vec2 uv;uniform mat4 worldViewProjection;varying vec2 vUV;void main(void){gl_Position=worldViewProjection*vec4(position,1.0);vUV =uv;}"),
+        SubShader("unlit2", Fragment, Map("color" -> Uniform, "opacity" -> Uniform, "tex" -> Uniform), "precision highp float;varying vec2 vUV;uniform sampler2D tex;uniform vec3 color;uniform float opacity;void main(void){gl_FragColor=vec4(color,opacity);}")
     )
 }
  
@@ -51,41 +50,37 @@ enum ShaderParamType {
   case Uniform
   case Texture
 }
- 
-final case class ShaderParam[T](val name: String, val paramType: ShaderParamType, val defaultValue: Option[T]) {
-  override def hashCode(): Int = name.hashCode
-  override def equals(x: Any): Boolean = canEqual(x) && name == x.asInstanceOf[ShaderParam[_]].name
-  def set(parameter: String, newDefault: Some[T]) = ShaderParam[T](name, paramType, newDefault)
-}
 
 // TODO: extract params from shader code
-final case class SubShader(val name: String, val shaderType: ShaderType, val code: String, val params: Set[ShaderParam[_]]) {
+final case class SubShader(val name: String, val shaderType: ShaderType, val params: Map[String, ShaderParamType], val code: String) {
   if (!BABYLON.Effect.ShadersStore.contains(name)) BABYLON.Effect.ShadersStore.addOne((s"${name}${shaderType.storeSuffix}", code))
 
   val path = (shaderType.pathKey, name)
-  def collectNames(typ: ShaderParamType) = params.foldLeft(Array.apply[String]())((c,p) => if (p.paramType==typ) c:+p.name else c)
+  def collectNames(typ: ShaderParamType) = params.foldLeft(Array.apply[String]())((c, p) => if (p._2==typ) c:+p._1 else c)
   lazy val uniformNames = collectNames(ShaderParamType.Uniform)
   lazy val textureNames = collectNames(ShaderParamType.Texture)
-  def set(parameter: String, newDefault: Some[_]) = SubShader(name, shaderType, code, {
-    params.find(_.name==parameter).map(p => ShaderParam(p.name, p.paramType, newDefault)).map(params + _).getOrElse(params)
-  })
 }
 
-final case class ParameterisedShader(val vertex: SubShader, val fragment: SubShader) {
+final case class ParameterisedShader(val vertex: SubShader, val fragment: SubShader, val defaults: Map[String, Option[Any]]) {
   require(vertex.shaderType==ShaderType.Vertex, "need a vertex shader")
   require(fragment.shaderType==ShaderType.Fragment, "need a fragment shader")
 
-  def paramMap = collection.mutable.Map.from((vertex.params union fragment.params).map(p => (p.name, p.defaultValue)))
   lazy val toShaderPath = StringDictionary(vertex.path, fragment.path)
   lazy val toShaderOpts = PartialIShaderMaterialOptAttributes.MutableBuilder(PartialIShaderMaterialOptAttributes())
       .setUniformBuffers(vertex.uniformNames++fragment.uniformNames)
       .setSamplers(vertex.textureNames++fragment.textureNames)
-  def set(parameter: String, newDefault: Some[_]) = ParameterisedShader(vertex.set(parameter, newDefault), fragment.set(parameter, newDefault))
+  def set(param: String, newDefault:Some[_]): ParameterisedShader = set((param -> newDefault))
+  def set(newDefaults: (String, Some[_])*) = ParameterisedShader(vertex, fragment, defaults ++ newDefaults)
+}
+
+object ParameterisedShader {
+  def derive(vertex: SubShader, fragment: SubShader): ParameterisedShader =
+    ParameterisedShader(vertex, fragment, Map.from((vertex.params.keySet union fragment.params.keySet).map(p => (p, Option.empty[Any]))))
 }
 
 final class ParameterisedShaderMaterial(name: String, scene: BABYLON.Scene, val shader: ParameterisedShader) {
   val underlying = BABYLON.ShaderMaterial(name, scene, shader.toShaderPath, shader.toShaderOpts)
-  val params = shader.paramMap
+  val params = collection.mutable.Map.from(shader.defaults)
   params.foreach(p => p._2.foreach(setAny(p._1, _)))
 
   def set(name: String, value: BABYLON.Color3) = { underlying.setColor3(name, value); params(name) = Some(value) }
