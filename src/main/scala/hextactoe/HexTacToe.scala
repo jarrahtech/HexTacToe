@@ -31,7 +31,7 @@ var isPlayerTurn = true
 def HexTacToe(): Unit = {
   renderTurn(yourTurn)
   val (scene, camera) = createScene()
-  loadUnlitTransparentShader
+  //loadUnlitTransparentShader
 
   val grid = BabylonGrid.build(scene, Dimensions.square(3), 0.75)
   scene.onPointerDown = (e, _, _) => if (e.detail.map(_<=1).getOrElse(true)) then {

@@ -61,6 +61,15 @@ object BabylonGrid {
       BabylonGrid(display, (0 until sizeInHexes.width.toInt).toList.map(c => (0 until sizeInHexes.height.toInt).toList.map(r => {
         drawTexture(scene, dim, hexTexture).tap(_.position = projectFlatToBabylon3D(origin add display.toPixel(Coord(c, r))))
       })), origin)
+
+      /*
+      
+    import scala.concurrent.duration._
+    import com.jarrahtechnology.kassite.tween._
+    val tweenMgr = TweenManager(scene)
+    //MoveTween.linear(Duration(2, SECONDS), origin, BABYLON.Vector3(4, 0, 0)).run(tweens)
+    MaterialTween.shaderColor3Parameter(Duration(500, MILLISECONDS), mat, "color", player.colour).runOn(tweenMgr)
+      */
     }
 
     // TODO: V2 & V3 can convert to typings.babylonjs.BABYLON.{V2, V3} and project
