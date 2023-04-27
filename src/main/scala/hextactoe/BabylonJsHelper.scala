@@ -93,7 +93,7 @@ object BabylonJsHelper {
 
   import com.jarrahtechnology.kassite.shader._
 
-  def drawTexture(scene: BABYLON.Scene, dimensions: Dimensions, texture: BABYLON.DynamicTexture): BABYLON.Mesh = {
+  def drawTexture(scene: BABYLON.Scene, dimensions: Dimensions, texture: BABYLON.DynamicTexture): (BABYLON.Mesh, ParameterisedShaderMaterial) = {
     val plane = BABYLON.MeshBuilder.CreatePlane("plane", dimensions.toPlane, scene).asInstanceOf[BABYLON.Mesh]
     val mat = Shaders.unlitTransparent.toMaterial(scene)
     //val mat = BABYLON.ShaderMaterial("shader", scene, unlitTransparentShaderPath, unlitTransparentShaderOpts)
@@ -102,6 +102,6 @@ object BabylonJsHelper {
     mat.setFloat("opacity", 0.9)
     mat.alpha = 0.9 
     plane.material = mat
-    plane
+    (plane, mat)
   }
 }

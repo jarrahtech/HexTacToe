@@ -42,6 +42,7 @@ final class ParameterisedShaderMaterial(name: String, scene: GLOBAL_BABYLON.Scen
   override def setVector4(name: String, value: Vector4) = { super.setVector4(name, value); params(name) = Some(value); this }
   
   def get(name: String) = params(name)
+  // TODO: complete these
   def getColor3(name: String): Option[GLOBAL_BABYLON.Color3] = params(name) match {
     case Some(c: GLOBAL_BABYLON.Color3) => Some(c)
     case _ => None

@@ -12,6 +12,7 @@ import typings.babylonjs.global.*
 import BabylonJsHelper._
 import typings.babylonjs.anon.Diameter
 import com.jarrahtechnology.hex.*
+import typings.babylonjs.BABYLON.PointerInfo
 
 final case class Actor(val id: Int, val colour: BABYLON.Color3)
 val player = Actor(0, BABYLON.Color3(0, 0.75, 1))
@@ -27,42 +28,43 @@ def renderTurn(who: String) = dom.document.getElementById("turn").innerHTML = wh
 
 var isPlayerTurn = true
 
+def selectHex(scene: BABYLON.Scene, camera: BABYLON.FreeCamera, grid: BabylonGrid[_]) = {
+  val ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), camera, false)
+  scene.pickWithRay(ray).pickedPoint match {
+    case pt: BABYLON.Vector3 => grid.fromPixel(pt)
+    case _ => None
+  }
+}
+
 @main
 def HexTacToe(): Unit = {
   renderTurn(yourTurn)
   val (scene, camera) = createScene()
-  //loadUnlitTransparentShader
 
   val grid = BabylonGrid.build(scene, Dimensions.square(3), 0.75)
-  scene.onPointerDown = (e, _, _) => if (e.detail.map(_<=1).getOrElse(true)) then {
-    val ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON.Matrix.Identity(), camera, false)
-    scene.pickWithRay(ray).pickedPoint match {
-      case pt: BABYLON.Vector3 => click(grid.fromPixel(pt), grid) 
-      case _ => {}
-    }
-  } 
 
-  //import com.jarrahtechnology.kassite._
-  //val origin = BABYLON.MeshBuilder.CreateSphere("sphere", typings.babylonjs.anon.DiameterZ.MutableBuilder(typings.babylonjs.anon.DiameterZ()).setDiameter(0.5), scene).asInstanceOf[BABYLON.Mesh]
-  //val o = typings.babylonjs.anon.SourcePlane.MutableBuilder(typings.babylonjs.anon.SourcePlane()).setWidth(128).setHeight(128)
-  //val plane = BABYLON.MeshBuilder.CreatePlane("plane", o, scene).asInstanceOf[BABYLON.Mesh]
-  //val s = Shaders.unlitTransparent.set(("opacity"->Some(0.99)),("color"->Some(BABYLON.Color3(0,0,1))),("tex"->Some(drawFlatTopHexTexture(scene, 64))))
-  //val mat = ParameterisedShaderMaterial("mat", scene, s)
-  //mat.underlying.alpha = 0.99 // <1 so bg disappears
-  //plane.material = mat.underlying
-  //mat.set("color", BABYLON.Color3(1,0,0))
-  //println(s"oo ${mat.get("tex")}")
-  //import scala.concurrent.duration._
-  //import com.jarrahtechnology.kassite.tween._
-  //val tweens = TweenManager(scene)
-  //MoveTween.linear(Duration(2, SECONDS), origin, BABYLON.Vector3(4, 0, 0)).run(tweens)
-}
+  import scala.concurrent.duration._
+  import com.jarrahtechnology.kassite.tween._
+  import com.jarrahtechnology.kassite.shader._
+  val tweenMgr = TweenManager(scene)
+  val mouseMove = BABYLON.Observable[PointerInfo]()
+  var lastTween = Option.empty[(Coord, Tween)]
+  def stopPulse = { lastTween.foreach(_._2.stop); lastTween = None }
+  def pulse(c: Coord) = 
+    lastTween match {
+      case Some((cc, _)) if c==cc => None // already pulsing do nothing
+      case Some((cc, t)) => { stopPulse; Some(c) }
+      case None => Some(c) 
+    } foreach(c => lastTween = grid.mesh(c).map(m => (c, MaterialTween.shaderColor3Parameter(Duration(300, MILLISECONDS), m, "color", player.colour).runOn(tweenMgr))))
 
-def colorToVector3(c: BABYLON.Color3) = BABYLON.Vector3(c.r, c.g, c.b)
+  mouseMove.add((pi, es) => selectHex(scene, camera, grid) match {
+    //case Some((Some(_), _)) => stopPulse // real hex but already claimed
+    case Some((None, c)) if isPlayerTurn && (pi.event.button<0) => pulse(c) // real unclaimed hex and player hovering over it on their turn
+    case Some((None, c)) if isPlayerTurn => { stopPulse; doPlayerTurn(c, grid)} // real unclaimed hex and player clicked in their turn
+    case _ => stopPulse // everything else 
+  })
 
-def click[C <: CoordSystem](h: Option[(HexModel, Coord)], grid: BabylonGrid[C]) = h match {
-  case Some(None, c) if isPlayerTurn => doPlayerTurn(c, grid) // real hex and not claimed by anyone
-  case _ => {} // do nothing
+  scene.onPointerObservable = mouseMove
 }
 
 def doPlayerTurn[C <: CoordSystem](c: Coord, grid: BabylonGrid[C]) = {

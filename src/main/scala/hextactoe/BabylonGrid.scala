@@ -9,6 +9,7 @@ import org.scalajs.dom
 import scalajs.js.Thenable.Implicits.thenable2future
 import concurrent.ExecutionContext.Implicits.global
 import com.jarrahtechnology.util.Vector2    
+import com.jarrahtechnology.kassite.shader._
 
 type HexModel = Option[Int]
 
@@ -20,7 +21,7 @@ val lines = List(DirectionPath(List(None, Some(North), Some(North))),
                 DirectionPath(List(None, Some(NorthEast), Some(NorthEast))))
 
 // TODO: should HexGridDisplay move in Babylon tools (from hex library)
-final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel, C], meshes: List[List[BABYLON.Mesh]], val origin: Vector2) {
+final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel, C], meshes: List[List[ParameterisedShaderMaterial]], val origin: Vector2) {
     def deriveBoundingBox = {
       val w = display.grid.coords.hexRadiiWidth*display.hexRadius/2d
       val h = display.grid.coords.hexRadiiHeight*display.hexRadius/2d
@@ -36,13 +37,15 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
     // TODO: use generics so don't need to cast here!
     def claim(actor: Actor, c: Coord) = {
         display.grid.asInstanceOf[MutableRectangularHexGrid[HexModel, C]].set(c, Some(actor.id))
-        meshes(c.column)(c.row).material.asInstanceOf[BABYLON.ShaderMaterial].setVector3("color", colorToVector3(actor.colour))
+        meshes(c.column)(c.row).setColor3("color", actor.colour)
     }
 
     def isDraw = display.grid.filter(_._2.isEmpty).isEmpty
     val linePaths = lines.map(_.toPath(display.grid))
     def winner: Option[Int] = display.grid.find((c, h) => xInLine(c, h.getOrElse(-1), 3)).flatMap(_._2)
     def xInLine(c: Coord, id: Int, x: Int) = linePaths.map(_(c)).exists(_.map(_.filter(_._2.getOrElse(-1)==id).length).getOrElse(0)==x)
+
+    def mesh(c: Coord) = meshes.lift(c.column).flatMap(_.lift(c.row))
 }
 
 object BabylonGrid {
@@ -59,7 +62,7 @@ object BabylonGrid {
       val hexTexture = drawFlatTopHexTexture(scene, resolution)
       val origin = calcRadiiOrigin(coords, sizeInHexes) multiply hexRadius
       BabylonGrid(display, (0 until sizeInHexes.width.toInt).toList.map(c => (0 until sizeInHexes.height.toInt).toList.map(r => {
-        drawTexture(scene, dim, hexTexture).tap(_.position = projectFlatToBabylon3D(origin add display.toPixel(Coord(c, r))))
+        drawTexture(scene, dim, hexTexture).tap(_._1.position = projectFlatToBabylon3D(origin add display.toPixel(Coord(c, r))))._2
       })), origin)
 
       /*
