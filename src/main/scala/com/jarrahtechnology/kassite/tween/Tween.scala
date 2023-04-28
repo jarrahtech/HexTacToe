@@ -14,17 +14,37 @@ trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, action: D
   def fireFinished = onFinish.foreach(_(this.asInstanceOf[T]))
   def runOn(manager: TweenManager) = manager.run(this)
 }
+/*
+trait ProgrammaticAnimation {
+  protected var timeScale = 1d
 
-final class Tween(val params: TweenParameters[_], val manager: TweenManager) {
-  private var runTime = -params.delay
-  private var timeScale = 1d
-
-  def update(delta: Duration) = {runTime = runTime + delta*timeScale; params.updateTweenWith(runTime); if (params.hasFinishedAfter(runTime)) stop }
-  def progressTime = runTime
+  def manager: TweenManager
   def pause = timeScale = 0
   def unpause = timeScale = 1
   def isPaused = timeScale==0 || manager.isPaused
   def isStopped = !manager.manages(this)
+  def stop: Boolean = manager.remove(this)
+  def update(delta: Duration): Unit 
+}
+
+// TODO: check traits do not use parameter lists, but defs instead!!!! check all libs
+// TODO: can this be subsumed by Tween? If not generalise better (names/functions), have runOn
+final class DeltaProgrammaticAnimation(action: Duration => Unit, val manager: TweenManager) extends ProgrammaticAnimation {
+  def update(delta: Duration) = action(delta)
+  def start = if (!manager.manages(this)) manager.run(this)
+}
+*/
+final class Tween(val params: TweenParameters[_], val manager: TweenManager) { //extends ProgrammaticAnimation {
+  private var runTime = -params.delay
+
+  protected var timeScale = 1d
+  def pause = timeScale = 0
+  def unpause = timeScale = 1
+  def isPaused = timeScale==0 || manager.isPaused
+  def isStopped = !manager.manages(this)
+
+  def update(delta: Duration) = {runTime = runTime + delta*timeScale; params.updateTweenWith(runTime); if (params.hasFinishedAfter(runTime)) stop }
+  def progressTime = runTime
   def stop = { params.fireFinished; manager.remove(this) }
   def restart = { runTime = -params.delay; if (!manager.manages(this)) manager.run(this); this } 
   def syncTo(other: Tween) = { 
@@ -42,8 +62,8 @@ final class TweenManager(scene: BABYLON.Scene) {
     tweens.foreach(_.update(delta))
   })
 
-  def run(t: Tween): Tween = { if (t.manager == this) tweens.add(t); t }
-  def run(params: TweenParameters[_]): Tween = run(Tween(params, this))
+  def run(t: Tween): Tween = { println("ddzxxz "+t); if (t.manager == this) {println(t); tweens.add(t)}; t }
+  def run(params: TweenParameters[_]): Tween = {val t = Tween(params, this); println("vvv "+t.manager); run(t) }
   def remove(tween: Tween) = tweens.remove(tween)
   def manages(tween: Tween) = tweens.exists(_ == tween)
 

@@ -34,6 +34,11 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
         display.grid.hexAt(display.fromPixel(Vector2(p.x, p.y) subtract origin)).map((_, coord))
     }
 
+    def toPixel(c: Coord): BABYLON.Vector3 = {
+        val p = display.toPixel(c) add origin
+        BABYLON.Vector3(p.x, p.y, 0)
+    }
+
     // TODO: use generics so don't need to cast here!
     def claim(actor: Actor, c: Coord) = {
         display.grid.asInstanceOf[MutableRectangularHexGrid[HexModel, C]].set(c, Some(actor.id))
