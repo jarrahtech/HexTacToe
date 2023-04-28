@@ -38,7 +38,7 @@ final class TweenManager(scene: BABYLON.Scene) {
   private var timeScale = 1d
 
   scene.onBeforeRenderObservable.add((sc, ev) => {
-    val delta = Duration(scene.deltaTime.toLong, MILLISECONDS)
+    val delta = Duration((scene.getDeterministicFrameTime()*1000).toLong, MICROSECONDS)
     tweens.foreach(_.update(delta))
   })
 

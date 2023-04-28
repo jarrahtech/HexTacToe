@@ -19,29 +19,7 @@ object Dimensions {
 }
 
 object BabylonJsHelper {
-/*
-  def loadUnlitTransparentShader = {
-    BABYLON.Effect.ShadersStore.addOne(("basicVertexShader", "precision highp float;attribute vec3 position;attribute vec2 uv;uniform mat4 worldViewProjection;varying vec2 vUV;void main(void){gl_Position=worldViewProjection*vec4(position,1.0);vUV =uv;}"))
-    BABYLON.Effect.ShadersStore.addOne(("unlitFragmentShader", "precision highp float;varying vec2 vUV;uniform sampler2D textureSampler;uniform vec3 color;uniform float opacity;void main(void){gl_FragColor=texture2D(textureSampler,vUV)*vec4(color,opacity);}"))
-  }
 
-  val unlitTransparentShaderPath = StringDictionary(("vertex", "basic"),("fragment", "unlit"))
-  val unlitTransparentShaderOpts = PartialIShaderMaterialOptAttributes.MutableBuilder(PartialIShaderMaterialOptAttributes())
-        //.setAttributesVarargs("position", "uv")
-        .setUniformBuffersVarargs("color", "opacity")
-        .setSamplersVarargs("textureSampler")
-
-  val nullPlaneOptions = typings.babylonjs.anon.SourcePlane()
-
-  def unlitTransparentMaterial(scene: BABYLON.Scene, texture: BABYLON.DynamicTexture) = {
-    val mat = BABYLON.ShaderMaterial("shader", scene, unlitTransparentShaderPath, unlitTransparentShaderOpts)
-    mat.setTexture("textureSampler", texture)
-    mat.setColor3("color", BABYLON.Color3(1,1,1));
-    mat.setFloat("opacity", 1);
-    mat.alpha = 0.99 // <1 so bg disappears
-    mat
-  }
-*/
   import scalajs.js.Thenable.Implicits.thenable2future
   import concurrent.ExecutionContext.Implicits.global
   def load(path: String) = for {
@@ -96,9 +74,7 @@ object BabylonJsHelper {
   def drawTexture(scene: BABYLON.Scene, dimensions: Dimensions, texture: BABYLON.DynamicTexture): (BABYLON.Mesh, ParameterisedShaderMaterial) = {
     val plane = BABYLON.MeshBuilder.CreatePlane("plane", dimensions.toPlane, scene).asInstanceOf[BABYLON.Mesh]
     val mat = Shaders.unlitTransparent.toMaterial(scene)
-    //val mat = BABYLON.ShaderMaterial("shader", scene, unlitTransparentShaderPath, unlitTransparentShaderOpts)
     mat.setTexture("tex", texture)
-    //mat.setColor3("color", BABYLON.Color3.White())// BABYLON.Vector3(1,1,1))
     mat.setFloat("opacity", 0.9)
     mat.alpha = 0.9 
     plane.material = mat

@@ -13,6 +13,7 @@ import BabylonJsHelper._
 import typings.babylonjs.anon.Diameter
 import com.jarrahtechnology.hex.*
 import typings.babylonjs.BABYLON.PointerInfo
+import typings.babylonjs.BABYLON.AbstractMesh
 
 final case class Actor(val id: Int, val colour: BABYLON.Color3)
 val player = Actor(0, BABYLON.Color3(0, 0.75, 1))
@@ -47,7 +48,6 @@ def HexTacToe(): Unit = {
   import com.jarrahtechnology.kassite.tween._
   import com.jarrahtechnology.kassite.shader._
   val tweenMgr = TweenManager(scene)
-  val mouseMove = BABYLON.Observable[PointerInfo]()
   var lastTween = Option.empty[(Coord, Tween)]
   def stopPulse = { lastTween.foreach(_._2.stop); lastTween = None }
   def pulse(c: Coord) = 
@@ -56,15 +56,24 @@ def HexTacToe(): Unit = {
       case Some((cc, t)) => { stopPulse; Some(c) }
       case None => Some(c) 
     } foreach(c => lastTween = grid.mesh(c).map(m => (c, MaterialTween.shaderColor3Parameter(Duration(300, MILLISECONDS), m, "color", player.colour).runOn(tweenMgr))))
-
-  mouseMove.add((pi, es) => selectHex(scene, camera, grid) match {
-    //case Some((Some(_), _)) => stopPulse // real hex but already claimed
+  
+  scene.onPointerObservable.add((pi, es) => selectHex(scene, camera, grid) match {
     case Some((None, c)) if isPlayerTurn && (pi.event.button<0) => pulse(c) // real unclaimed hex and player hovering over it on their turn
     case Some((None, c)) if isPlayerTurn => { stopPulse; doPlayerTurn(c, grid)} // real unclaimed hex and player clicked in their turn
     case _ => stopPulse // everything else 
   })
 
-  scene.onPointerObservable = mouseMove
+  BABYLON.SceneLoader.ImportMesh("turret", "/SpaceKit_Kenney/", "turret.glb", scene, (newMeshes, _, _, _, _, _, _) => {
+    newMeshes(0).rotation = BABYLON.Vector3(math.Pi/4,0,math.Pi)
+    newMeshes(0).position = BABYLON.Vector3(1,0,0)
+    //RotationTween.rotateAround(Duration(2, SECONDS), newMeshes(0), BABYLON.Vector3(0,0,1)).runOn(tweenMgr)
+  }, {}, {}, {})
+
+  BABYLON.SceneLoader.ImportMesh("satelliteDish_detailed", "/SpaceKit_Kenney/", "satelliteDish.glb", scene, (newMeshes, _, _, _, _, _, _) => {
+    newMeshes(0).rotate(BABYLON.Vector3(1,0,0), math.Pi)
+    newMeshes(0).scaling = BABYLON.Vector3(0.14,0.14,0.14)
+  }, {}, {}, {})
+  
 }
 
 def doPlayerTurn[C <: CoordSystem](c: Coord, grid: BabylonGrid[C]) = {
