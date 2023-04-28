@@ -14,38 +14,35 @@ trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, action: D
   def fireFinished = onFinish.foreach(_(this.asInstanceOf[T]))
   def runOn(manager: TweenManager) = manager.run(this)
 }
-/*
+
 trait ProgrammaticAnimation {
   protected var timeScale = 1d
 
   def manager: TweenManager
+  def update(delta: Duration): Unit
+
   def pause = timeScale = 0
   def unpause = timeScale = 1
-  def isPaused = timeScale==0 || manager.isPaused
+  def isPaused = timeScale==0 || manager.isPaused 
   def isStopped = !manager.manages(this)
   def stop: Boolean = manager.remove(this)
-  def update(delta: Duration): Unit 
 }
 
 // TODO: check traits do not use parameter lists, but defs instead!!!! check all libs
 // TODO: can this be subsumed by Tween? If not generalise better (names/functions), have runOn
-final class DeltaProgrammaticAnimation(action: Duration => Unit, val manager: TweenManager) extends ProgrammaticAnimation {
-  def update(delta: Duration) = action(delta)
+final case class DeltaProgrammaticAnimation(action: Duration => Unit, val manager: TweenManager) extends ProgrammaticAnimation {
+  def update(delta: Duration) = action(delta*timeScale)
   def start = if (!manager.manages(this)) manager.run(this)
 }
-*/
-final class Tween(val params: TweenParameters[_], val manager: TweenManager) { //extends ProgrammaticAnimation {
-  private var runTime = -params.delay
+// TODO: set as private and force construction through object with runOn?
+// TODO: Tween <- DeltaTween, InterpTween
 
-  protected var timeScale = 1d
-  def pause = timeScale = 0
-  def unpause = timeScale = 1
-  def isPaused = timeScale==0 || manager.isPaused
-  def isStopped = !manager.manages(this)
+final case class Tween(val params: TweenParameters[_], val manager: TweenManager) extends ProgrammaticAnimation {
+  private var runTime = -params.delay
 
   def update(delta: Duration) = {runTime = runTime + delta*timeScale; params.updateTweenWith(runTime); if (params.hasFinishedAfter(runTime)) stop }
   def progressTime = runTime
-  def stop = { params.fireFinished; manager.remove(this) }
+  override def stop = { params.fireFinished; super.stop }
   def restart = { runTime = -params.delay; if (!manager.manages(this)) manager.run(this); this } 
   def syncTo(other: Tween) = { 
     runTime = params.duration * LoopType.loopForwardFromStart(other.params.duration)(other.runTime)
@@ -53,8 +50,9 @@ final class Tween(val params: TweenParameters[_], val manager: TweenManager) { /
   }
 }
 
+// TODO: don't take scene, take a fn to get time (eg TweenManager.frameTime => current)
 final class TweenManager(scene: BABYLON.Scene) {
-  private val tweens: HashSet[Tween] = HashSet.empty[Tween]
+  private val tweens: HashSet[ProgrammaticAnimation] = HashSet.empty[ProgrammaticAnimation]
   private var timeScale = 1d
 
   scene.onBeforeRenderObservable.add((sc, ev) => {
@@ -62,10 +60,13 @@ final class TweenManager(scene: BABYLON.Scene) {
     tweens.foreach(_.update(delta))
   })
 
-  def run(t: Tween): Tween = { println("ddzxxz "+t); if (t.manager == this) {println(t); tweens.add(t)}; t }
-  def run(params: TweenParameters[_]): Tween = {val t = Tween(params, this); println("vvv "+t.manager); run(t) }
-  def remove(tween: Tween) = tweens.remove(tween)
-  def manages(tween: Tween) = tweens.exists(_ == tween)
+  // Could do the next two lines in one with generics, but scala-js doesn't seem to like that at runtime :(
+  def run(t: Tween): Tween = { if (t.manager == this) tweens.add(t); t }
+  def run(t: DeltaProgrammaticAnimation): DeltaProgrammaticAnimation = { if (t.manager == this) tweens.add(t); t } 
+  def run(params: TweenParameters[_]): Tween = {val t = Tween(params, this); run(t) }
+  
+  def remove(tween: ProgrammaticAnimation) = tweens.remove(tween)
+  def manages(tween: ProgrammaticAnimation) = tweens.exists(_ == tween)
 
   def setTimeScale(s: Double) = { require(timeScale>=0, s"speed=${timeScale} !>= 0"); timeScale = s }
   def getTimeScale = timeScale
@@ -74,4 +75,4 @@ final class TweenManager(scene: BABYLON.Scene) {
   def isPaused = timeScale==0
 }
 
-// TODO: path move, scale, material color, rotation, composite, alpha, look to/face, shake, punch
+// TODO: path move, composite, alpha, look to/face, shake, punch

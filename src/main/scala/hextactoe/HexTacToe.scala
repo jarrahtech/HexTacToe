@@ -72,26 +72,31 @@ def createActorMarker(scene: BABYLON.Scene, actor: Actor, target: BABYLON.Vector
     parent.addChild(newMeshes(0)) 
     parent.position = target 
     parent.scaling = BABYLON.Vector3(0,0,0)
-    println(tweenMgr)
-    //RotationTween.rotateAround(Duration(4, SECONDS), parent, BABYLON.Vector3(0,0,1), tweenMgr).start
+    val t =RotationTween.rotateAround(Duration(4, SECONDS), parent, BABYLON.Vector3(0,0,1), tweenMgr)
+    t.start
     ScaleTween.scaleTo(Duration(300, MILLISECONDS), parent, BABYLON.Vector3(1,1,1)).runOn(tweenMgr)
   }, {}, {}, {})
 }
+
+def explode(scene: BABYLON.Scene) = BABYLON.ParticleHelper.CreateAsync("explosion", scene).`then`(particles => {
+    particles.systems.foreach(_.disposeOnStop = true)
+    particles.start();
+  })
 
 def doPlayerTurn[C <: CoordSystem](c: Coord, grid: BabylonGrid[C], scene: BABYLON.Scene, tweenMgr: TweenManager) = {
   isPlayerTurn = false
   grid.claim(player, c)
   createActorMarker(scene, player, grid.toPixel(c), tweenMgr)
-  isFinished(grid, () => {
+  isFinished(scene, grid, () => {
     renderTurn(opponentTurn)
     doOpponentTurn(grid, scene, tweenMgr)
   })
 } 
 
-def isFinished[C <: CoordSystem](grid: BabylonGrid[C], nextTurn: () => Unit) = grid.winner match {
+def isFinished[C <: CoordSystem](scene: BABYLON.Scene, grid: BabylonGrid[C], nextTurn: () => Unit) = grid.winner match {
   case Some(player.id) => { isPlayerTurn = false; renderTurn(win) }
-  case Some(opponent.id) => { isPlayerTurn = false; renderTurn(lose) }
-  case None if grid.isDraw => { isPlayerTurn = false; renderTurn(draw) }
+  case Some(opponent.id) => { isPlayerTurn = false; renderTurn(lose); explode(scene) }
+  case None if grid.isDraw => { isPlayerTurn = false; renderTurn(draw); explode(scene) }
   case _ => nextTurn()
 }
 
@@ -99,7 +104,7 @@ def doOpponentTurn[C <: CoordSystem](grid: BabylonGrid[C], scene: BABYLON.Scene,
   grid.display.grid.find(_._2.isEmpty).foreach((c, h) => {
     grid.claim(opponent, c)
     createActorMarker(scene, opponent, grid.toPixel(c), tweenMgr)
-    isFinished(grid, () => {
+    isFinished(scene, grid, () => {
       renderTurn(yourTurn)
       isPlayerTurn = true
     })   
