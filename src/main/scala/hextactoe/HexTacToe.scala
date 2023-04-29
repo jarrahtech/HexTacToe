@@ -65,7 +65,7 @@ def HexTacToe(): Unit = {
   })
 }
 
-def createActorMarker(scene: BABYLON.Scene, actor: Actor, target: BABYLON.Vector3, tweenMgr: TweenManager) = {
+def createActorMarker(scene: BABYLON.Scene, actor: Actor, target: BABYLON.Vector3, tweenMgr: TweenManager, onFinished: ScaleTweenParameters => Unit) = {
   BABYLON.SceneLoader.ImportMesh(actor.meshName, "/SpaceKit_Kenney/", actor.meshFile, scene, (newMeshes, _, _, _, _, _, _) => {
     val parent = new BABYLON.Mesh("", scene)
     actor.meshSetup(newMeshes(0))
@@ -74,7 +74,7 @@ def createActorMarker(scene: BABYLON.Scene, actor: Actor, target: BABYLON.Vector
     parent.scaling = BABYLON.Vector3(0,0,0)
     val t =RotationTween.rotateAround(Duration(4, SECONDS), parent, BABYLON.Vector3(0,0,1), tweenMgr)
     t.start
-    ScaleTween.scaleTo(Duration(300, MILLISECONDS), parent, BABYLON.Vector3(1,1,1)).runOn(tweenMgr)
+    ScaleTween.scaleTo(Duration(300, MILLISECONDS), parent, BABYLON.Vector3(1,1,1), Some(onFinished)).runOn(tweenMgr)
   }, {}, {}, {})
 }
 
@@ -86,11 +86,11 @@ def explode(scene: BABYLON.Scene) = BABYLON.ParticleHelper.CreateAsync("explosio
 def doPlayerTurn[C <: CoordSystem](c: Coord, grid: BabylonGrid[C], scene: BABYLON.Scene, tweenMgr: TweenManager) = {
   isPlayerTurn = false
   grid.claim(player, c)
-  createActorMarker(scene, player, grid.toPixel(c), tweenMgr)
-  isFinished(scene, tweenMgr, grid, () => {
-    renderTurn(opponentTurn)
-    doOpponentTurn(grid, scene, tweenMgr)
-  })
+  createActorMarker(scene, player, grid.toPixel(c), tweenMgr, _ => {
+    isFinished(scene, tweenMgr, grid, () => {
+      renderTurn(opponentTurn)
+      doOpponentTurn(grid, scene, tweenMgr)
+    })})
 } 
 
 def isFinished[C <: CoordSystem](scene: BABYLON.Scene, tweenMgr: TweenManager, grid: BabylonGrid[C], nextTurn: () => Unit) = grid.winner match {
@@ -103,11 +103,11 @@ def isFinished[C <: CoordSystem](scene: BABYLON.Scene, tweenMgr: TweenManager, g
 def doOpponentTurn[C <: CoordSystem](grid: BabylonGrid[C], scene: BABYLON.Scene, tweenMgr: TweenManager) = {
   grid.display.grid.find(_._2.isEmpty).foreach((c, h) => {
     grid.claim(opponent, c)
-    createActorMarker(scene, opponent, grid.toPixel(c), tweenMgr)
-    isFinished(scene, tweenMgr, grid, () => {
-      renderTurn(yourTurn)
-      isPlayerTurn = true
-    })   
+    createActorMarker(scene, opponent, grid.toPixel(c), tweenMgr, _ => {
+      isFinished(scene, tweenMgr, grid, () => {
+        renderTurn(yourTurn)
+        isPlayerTurn = true
+      })})   
   })
 }
 
