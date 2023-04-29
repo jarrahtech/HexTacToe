@@ -10,6 +10,8 @@ enum ShaderType(val storeSuffix: String, val pathKey: String) {
 }
 
 sealed trait SubShader() {
+  require(params.params.distinctBy(_.name).length==params.params.length, "no duplicate parameter names")
+
   if (!BABYLON.Effect.ShadersStore.contains(name)) BABYLON.Effect.ShadersStore.addOne((s"${name}${shaderType.storeSuffix}", code))
 
   def name: String

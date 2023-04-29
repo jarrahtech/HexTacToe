@@ -49,8 +49,6 @@ final case class V3ShaderParameter(val name: String, val paramType: ShaderParamT
 final case class V4ShaderParameter(val name: String, val paramType: ShaderParamType, val initialValue: Option[BABYLON.Vector4]) extends ShaderParameter(_.setVector4)
 
 final case class ShaderParams(params: Seq[ShaderParameter[_]]) extends Iterable[ShaderParameter[_]] {
-  require(params.distinctBy(_.name).length==params.length, "no duplicate parameter names")
-
   def iterator = params.iterator
   def union(other: ShaderParams) = ShaderParams(params ++ other.params)
 

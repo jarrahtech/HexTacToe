@@ -26,6 +26,8 @@ trait ProgrammaticAnimation {
   def isPaused = timeScale==0 || manager.isPaused 
   def isStopped = !manager.manages(this)
   def stop: Boolean = manager.remove(this)
+  def setTimeScale(s: Double) = { require(s>=0, s"speed=${s} !>= 0"); timeScale = s }
+  def getTimeScale = timeScale
 }
 
 // TODO: check traits do not use parameter lists, but defs instead!!!! check all libs

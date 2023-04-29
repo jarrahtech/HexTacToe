@@ -87,14 +87,14 @@ def doPlayerTurn[C <: CoordSystem](c: Coord, grid: BabylonGrid[C], scene: BABYLO
   isPlayerTurn = false
   grid.claim(player, c)
   createActorMarker(scene, player, grid.toPixel(c), tweenMgr)
-  isFinished(scene, grid, () => {
+  isFinished(scene, tweenMgr, grid, () => {
     renderTurn(opponentTurn)
     doOpponentTurn(grid, scene, tweenMgr)
   })
 } 
 
-def isFinished[C <: CoordSystem](scene: BABYLON.Scene, grid: BabylonGrid[C], nextTurn: () => Unit) = grid.winner match {
-  case Some(player.id) => { isPlayerTurn = false; renderTurn(win) }
+def isFinished[C <: CoordSystem](scene: BABYLON.Scene, tweenMgr: TweenManager, grid: BabylonGrid[C], nextTurn: () => Unit) = grid.winner match {
+  case Some(player.id) => { isPlayerTurn = false; renderTurn(win); Fireworks.fireworks(scene, tweenMgr, 10) }
   case Some(opponent.id) => { isPlayerTurn = false; renderTurn(lose); explode(scene) }
   case None if grid.isDraw => { isPlayerTurn = false; renderTurn(draw); explode(scene) }
   case _ => nextTurn()
@@ -104,7 +104,7 @@ def doOpponentTurn[C <: CoordSystem](grid: BabylonGrid[C], scene: BABYLON.Scene,
   grid.display.grid.find(_._2.isEmpty).foreach((c, h) => {
     grid.claim(opponent, c)
     createActorMarker(scene, opponent, grid.toPixel(c), tweenMgr)
-    isFinished(scene, grid, () => {
+    isFinished(scene, tweenMgr, grid, () => {
       renderTurn(yourTurn)
       isPlayerTurn = true
     })   
