@@ -21,21 +21,21 @@ object Fireworks {
 
   def fireworks(scene: BABYLON.Scene, tweenMgr: TweenManager, count: Int) = {
     (1 to count).foreach(_ =>
-        firework(scene, tweenMgr, math.random()*0.5d+0.75d, 
-                    Duration(math.random()*4000+1000, MILLISECONDS), 
-                    Duration(math.random()*3000-1000, MILLISECONDS), 
-                    math.random()*0.6d+0.7d,
-                    math.random()*0.4d+0.8d)
+        firework(scene, tweenMgr, math.random()*0.5d+0.7d, 
+                    Duration(math.random()*6000+2000, MILLISECONDS), 
+                    Duration(math.max(1, math.random()*2000-1000), MILLISECONDS), 
+                    math.random()*3+1d)
     )
   }
 
-  def firework(scene: BABYLON.Scene, tweenMgr: TweenManager, size: Double, duration: Duration, delay: Duration, speed: Double, scale: Double) = {
+  def firework(scene: BABYLON.Scene, tweenMgr: TweenManager, size: Double, duration: Duration, delay: Duration, scale: Double) = {
     val sphere = BABYLON.Mesh.CreateSphere("fireworks_sphere", 32, size, scene)
     sphere.convertToFlatShadedMesh()
-    sphere.position = BABYLON.Vector3(math.random()*6-3, math.random()*6-3, math.random()*6-3)
+    sphere.position = BABYLON.Vector3(math.random()*6-3, math.random()*6-3, math.random()*10+5)
     val mat = fireworkShader.toMaterial(scene)
     sphere.material = mat
-    val t = MaterialTween.shaderFloatParameter(duration, delay, mat, "time", speed, Some(_ => sphere.dispose()))
+    sphere.scaling.setAll(0)
+    val t = MaterialTween.shaderFloatParameter(duration, delay, mat, "time", 8, Some(_ => sphere.scaling.setAll(1)), Some(_ => sphere.dispose()))
             .runOn(tweenMgr)
     t.setTimeScale(scale)
   }

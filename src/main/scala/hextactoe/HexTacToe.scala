@@ -94,7 +94,7 @@ def doPlayerTurn[C <: CoordSystem](c: Coord, grid: BabylonGrid[C], scene: BABYLO
 } 
 
 def isFinished[C <: CoordSystem](scene: BABYLON.Scene, tweenMgr: TweenManager, grid: BabylonGrid[C], nextTurn: () => Unit) = grid.winner match {
-  case Some(player.id) => { isPlayerTurn = false; renderTurn(win); Fireworks.fireworks(scene, tweenMgr, 10) }
+  case Some(player.id) => { isPlayerTurn = false; renderTurn(win); Fireworks.fireworks(scene, tweenMgr, 20) }
   case Some(opponent.id) => { isPlayerTurn = false; renderTurn(lose); explode(scene) }
   case None if grid.isDraw => { isPlayerTurn = false; renderTurn(draw); explode(scene) }
   case _ => nextTurn()

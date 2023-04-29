@@ -6,12 +6,14 @@ import typings.babylonjs.global.*
 import scala.collection.mutable.HashSet
 import scala.concurrent.duration._
 
-trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, action: Double => Unit, val loop: LoopType, val ease: EaseType, val delay: Duration, val onFinish: Option[T => Unit]) {
+// TODO: think about delay end and  builder
+trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, action: Double => Unit, val loop: LoopType, val ease: EaseType, val delay: Duration, val onStart: Option[T => Unit], val onFinish: Option[T => Unit]) {
   require(duration>Duration.Zero, s"duration=${duration} !> 0")
 
   val updateTweenWith = loop.progress(duration) andThen clamp01 andThen ease.method andThen action
   val hasFinishedAfter = loop.hasFinished(duration)
   def fireFinished = onFinish.foreach(_(this.asInstanceOf[T]))
+  def fireStarted = onStart.foreach(_(this.asInstanceOf[T]))
   def runOn(manager: TweenManager) = manager.run(this)
 }
 
@@ -42,7 +44,13 @@ final case class DeltaProgrammaticAnimation(action: Duration => Unit, val manage
 final case class Tween(val params: TweenParameters[_], val manager: TweenManager) extends ProgrammaticAnimation {
   private var runTime = -params.delay
 
-  def update(delta: Duration) = {runTime = runTime + delta*timeScale; params.updateTweenWith(runTime); if (params.hasFinishedAfter(runTime)) stop }
+  def update(delta: Duration) = {
+    val startTime = runTime
+    runTime = runTime + delta*timeScale
+    if (startTime.toNanos<=0 && runTime.toNanos>0) params.fireStarted
+    params.updateTweenWith(runTime)
+    if (params.hasFinishedAfter(runTime)) stop
+  }
   def progressTime = runTime
   override def stop = { params.fireFinished; super.stop }
   def restart = { runTime = -params.delay; if (!manager.manages(this)) manager.run(this); this } 
