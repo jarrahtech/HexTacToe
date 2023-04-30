@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+      <meta charset="UTF-8" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="icon" type="image/svg+xml" href="/hexagon.svg" />
+      <title>Hex - Tac - Toe</title>
+      <style>
+        :root {font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-text-size-adjust: 100%;}
+        * { margin: 0; padding: 0; }
+        html, body { overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; }
+        #renderCanvas { width: 100%; height: 80%; touch-action: none; display: block; outline: none;}
+        
+      </style>
+      <script src="https://cdn.babylonjs.com/babylon.js"></script>
+      <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+      <script type="module" crossorigin src="/assets/index-56766354.js"></script>
+    </head>
+    
+   <body style="background-color: black; color: white; text-align: center;">
+     <h2 style="font-size: 3em;"><i class="bi bi-hexagon"></i> - Tac - Toe</h2>
+     <div style="font-size: 2em;">
+        Claim three hexes in a line to win!
+        <div id="turn"></div>
+     </div>
+     
+     <canvas id="renderCanvas"></canvas>
+     <a href="https://github.com/jarrahtech/HexTacToe">https://github.com/jarrahtech/HexTacToe</a>
+     
+   </body>
+</html>
