@@ -66,7 +66,7 @@ def HexTacToe(): Unit = {
 }
 
 def createActorMarker(scene: BABYLON.Scene, actor: Actor, target: BABYLON.Vector3, tweenMgr: TweenManager, onFinished: ScaleTweenParameters => Unit) = {
-  BABYLON.SceneLoader.ImportMesh(actor.meshName, "/SpaceKit_Kenney/", actor.meshFile, scene, (newMeshes, _, _, _, _, _, _) => {
+  BABYLON.SceneLoader.ImportMesh(actor.meshName, "./SpaceKit_Kenney/", actor.meshFile, scene, (newMeshes, _, _, _, _, _, _) => {
     val parent = new BABYLON.Mesh("", scene)
     actor.meshSetup(newMeshes(0))
     parent.addChild(newMeshes(0)) 
