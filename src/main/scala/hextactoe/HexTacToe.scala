@@ -19,7 +19,6 @@ import com.jarrahtechnology.kassite.tween._
 import com.jarrahtechnology.kassite.shader._
 
 // TODO: cleanup up imports - typings.babylonjs.BABYLON & typings.babylonjs.global.BABYLON
-// TODO: how to detect asset base? also same problem with favicon
 
 final case class Actor(val id: Int, val colour: BABYLON.Color3, meshName: String, meshFile: String, meshSetup: AbstractMesh => Unit)
 val player = Actor(0, BABYLON.Color3(0, 0.75, 1), "satelliteDish_detailed", "satelliteDish.glb", m => { m.rotate(BABYLON.Vector3(1,0,0), math.Pi/6); m.scaling.scaleInPlace(0.12) })
@@ -67,7 +66,7 @@ def HexTacToe(): Unit = {
 }
 
 def createActorMarker(scene: BABYLON.Scene, actor: Actor, target: BABYLON.Vector3, tweenMgr: TweenManager, onFinished: ScaleTweenParameters => Unit) = {
-  BABYLON.SceneLoader.ImportMesh(actor.meshName, "SpaceKit_Kenney/", actor.meshFile, scene, (newMeshes, _, _, _, _, _, _) => {
+  BABYLON.SceneLoader.ImportMesh(actor.meshName, s"${BuildInfo.baseUrl}SpaceKit_Kenney/", actor.meshFile, scene, (newMeshes, _, _, _, _, _, _) => {
     val parent = new BABYLON.Mesh("", scene)
     actor.meshSetup(newMeshes(0))
     parent.addChild(newMeshes(0)) 

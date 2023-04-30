@@ -7,6 +7,7 @@ ThisBuild / versionScheme := Some("early-semver")
 Global / stQuiet := true
 
 lazy val hextactoe = project.in(file("."))
+  .enablePlugins(BuildInfoPlugin)
   .enablePlugins(ScalaJSPlugin) 
   .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
   .settings(
@@ -26,6 +27,10 @@ lazy val hextactoe = project.in(file("."))
           ModuleSplitStyle.SmallModulesFor(List("hextactoe")))
     },
     externalNpm := baseDirectory.value,
+
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "baseUrl" -> sys.env.getOrElse("BASE_URL", "/")),
+    buildInfoOptions += BuildInfoOption.BuildTime,
+    buildInfoPackage := "hextactoe",
 
     githubOwner := "jarrahtech",
     githubRepository := "hex",
