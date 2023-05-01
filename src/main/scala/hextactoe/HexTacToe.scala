@@ -1,6 +1,6 @@
 package hextactoe
 
-import scala.scalajs.js._
+import scala.scalajs.*
 import scala.scalajs.js.annotation.*
 import org.scalajs.dom
 import org.scalajs.dom.{Event, Image, SVGImageElement, XMLSerializer}
@@ -9,14 +9,14 @@ import typings.babylonjs.BABYLON.Material
 import org.scalajs.dom.SVGImageElement
 import typings.babylonjs.HTMLCanvasElement
 import typings.babylonjs.global.*
-import BabylonJsHelper._
+import BabylonJsHelper.*
 import typings.babylonjs.anon.Diameter
 import com.jarrahtechnology.hex.*
 import typings.babylonjs.BABYLON.PointerInfo
 import typings.babylonjs.BABYLON.AbstractMesh
-import scala.concurrent.duration._
-import com.jarrahtechnology.kassite.tween._
-import com.jarrahtechnology.kassite.shader._
+import scala.concurrent.duration.*
+import com.jarrahtechnology.kassite.tween.*
+import com.jarrahtechnology.kassite.shader.*
 
 // TODO: cleanup up imports - typings.babylonjs.BABYLON & typings.babylonjs.global.BABYLON
 
@@ -65,8 +65,11 @@ def HexTacToe(): Unit = {
   })
 }
 
+// TODO: put in GameConfig
+val meshesUrl = s"${BuildInfo.baseUrl}SpaceKit_Kenney/"
+
 def createActorMarker(scene: BABYLON.Scene, actor: Actor, target: BABYLON.Vector3, tweenMgr: TweenManager, onFinished: ScaleTweenParameters => Unit) = {
-  BABYLON.SceneLoader.ImportMesh(actor.meshName, s"${BuildInfo.baseUrl}SpaceKit_Kenney/", actor.meshFile, scene, (newMeshes, _, _, _, _, _, _) => {
+  BABYLON.SceneLoader.ImportMesh(actor.meshName, meshesUrl, actor.meshFile, scene, (newMeshes, _, _, _, _, _, _) => { 
     val parent = new BABYLON.Mesh("", scene)
     actor.meshSetup(newMeshes(0))
     parent.addChild(newMeshes(0)) 

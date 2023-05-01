@@ -1,11 +1,10 @@
 package hextactoe
 
-import scala.concurrent.duration._
-import typings.babylonjs.global._
-import com.jarrahtechnology.kassite.shader._
-import com.jarrahtechnology.kassite.shader.ShaderParamType._
-import com.jarrahtechnology.kassite.tween._
-import typings.std.stdStrings.del
+import scala.concurrent.duration.*
+import typings.babylonjs.global.*
+import com.jarrahtechnology.kassite.shader.*
+import com.jarrahtechnology.kassite.shader.ShaderParamType.*
+import com.jarrahtechnology.kassite.tween.*
 
 // from https://playground.babylonjs.com/#1OH09K#1672
 object Fireworks {
