@@ -61,7 +61,7 @@ final case class Tween(val params: TweenParameters[_], val manager: TweenManager
 }
 
 // TODO: don't take scene, take a fn to get time (eg TweenManager.frameTime => current)
-final class TweenManager(scene: BABYLON.Scene) {
+final class TweenManager(scene: typings.babylonjs.BABYLON.Scene) {
   private val tweens: HashSet[ProgrammaticAnimation] = HashSet.empty[ProgrammaticAnimation]
   private var timeScale = 1d
 

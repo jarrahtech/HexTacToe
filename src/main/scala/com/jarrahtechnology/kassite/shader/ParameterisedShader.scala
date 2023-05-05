@@ -36,6 +36,6 @@ final case class ParameterisedShader(val vertex: VertexShader, val fragment: Fra
       .setUniformBuffers(defaults.uniformNames)
       .setSamplers(defaults.textureNames)
 
-  def toMaterial(scene: BABYLON.Scene): ParameterisedShaderMaterial = toMaterial(scene, s"${fragment.name}_material")
-  def toMaterial(scene: BABYLON.Scene, name: String) = ParameterisedShaderMaterial(name, scene, this)
+  def toMaterial(scene: typings.babylonjs.BABYLON.Scene): ParameterisedShaderMaterial = toMaterial(scene, s"${fragment.name}_material")
+  def toMaterial(scene: typings.babylonjs.BABYLON.Scene, name: String) = ParameterisedShaderMaterial(name, scene, this)
 }

@@ -18,24 +18,24 @@ object Fireworks {
   )
   //TODO: needAlphaBlending: true & shaderMaterial.backFaceCulling = false;
 
-  def fireworks(scene: BABYLON.Scene, tweenMgr: TweenManager, count: Int) = {
+  def fireworks(state: GameState, count: Int) = {
     (1 to count).foreach(_ =>
-        firework(scene, tweenMgr, math.random()*0.5d+0.7d, 
+        firework(state, math.random()*0.5d+0.7d, 
                     Duration(math.random()*6000+2000, MILLISECONDS), 
                     Duration(math.max(1, math.random()*2000-1000), MILLISECONDS), 
                     math.random()*3+1d)
     )
   }
 
-  def firework(scene: BABYLON.Scene, tweenMgr: TweenManager, size: Double, duration: Duration, delay: Duration, scale: Double) = {
-    val sphere = BABYLON.Mesh.CreateSphere("fireworks_sphere", 32, size, scene)
+  def firework(state: GameState, size: Double, duration: Duration, delay: Duration, scale: Double) = {
+    val sphere = BABYLON.Mesh.CreateSphere("fireworks_sphere", 32, size, state.scene)
     sphere.convertToFlatShadedMesh()
     sphere.position = BABYLON.Vector3(math.random()*6-3, math.random()*6-3, math.random()*10+5)
-    val mat = fireworkShader.toMaterial(scene)
+    val mat = fireworkShader.toMaterial(state.scene)
     sphere.material = mat
     sphere.scaling.setAll(0)
     val t = MaterialTween.shaderFloatParameter(duration, delay, mat, "time", 8, Some(_ => sphere.scaling.setAll(1)), Some(_ => sphere.dispose()))
-            .runOn(tweenMgr)
+            .runOn(state.tweenMgr)
     t.setTimeScale(scale)
   }
 }

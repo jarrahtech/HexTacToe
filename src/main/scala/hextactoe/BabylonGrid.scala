@@ -29,7 +29,7 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
     }
 
     // TODO: util method for V2 conversion
-    def fromPixel(p: BABYLON.Vector3): Option[(HexModel, Coord)] = {
+    def fromPixel(p: typings.babylonjs.BABYLON.Vector3): Option[(HexModel, Coord)] = {
         val coord = display.fromPixel(Vector2(p.x, p.y) subtract origin)
         display.grid.hexAt(display.fromPixel(Vector2(p.x, p.y) subtract origin)).map((_, coord))
     }
@@ -40,7 +40,7 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
     }
 
     // TODO: use generics so don't need to cast here!
-    def claim(actor: Actor, c: Coord) = {
+    def claim(actor: GameActor, c: Coord) = {
         display.grid.asInstanceOf[MutableRectangularHexGrid[HexModel, C]].set(c, Some(actor.id))
         meshes(c.column)(c.row).setColor3("color", actor.colour)
     }

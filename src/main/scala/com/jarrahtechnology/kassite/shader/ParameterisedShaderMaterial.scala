@@ -7,7 +7,7 @@ import typings.babylonjs.BABYLON._
 
 // TODO: add v4 to jt.util?
 // TODO: be able to change initial values?
-final class ParameterisedShaderMaterial(name: String, scene: GLOBAL_BABYLON.Scene, val shader: ParameterisedShader) extends GLOBAL_BABYLON.ShaderMaterial(name, scene, shader.toShaderPath, shader.toShaderOpts) {
+final class ParameterisedShaderMaterial(name: String, scene: typings.babylonjs.BABYLON.Scene, val shader: ParameterisedShader) extends GLOBAL_BABYLON.ShaderMaterial(name, scene, shader.toShaderPath, shader.toShaderOpts) {
   private val params = collection.mutable.Map.from(shader.defaults.map(p => (p.name -> p.initialValue)))
   shader.defaults.foreach(_.setInitial(this))
 
