@@ -1,18 +1,19 @@
 package com.jarrahtechnology.kassite.tween
 
-import typings.babylonjs.global.*
+import typings.babylonjs.*
 import scala.concurrent.duration._
 
 final case class LineMoveTweenParameters(d: Duration, val mesh: BABYLON.Mesh, val dest: BABYLON.Vector3, val origin: BABYLON.Vector3) 
   extends TweenParameters[LineMoveTweenParameters](d, v => mesh.position = MoveTween.v3lerp(v, origin, dest), LoopType.Once, EaseType.Sigmoid, Duration.Zero, None, None) 
 
 object MoveTween {
-  def moveTo(duration: Duration, mesh: BABYLON.Mesh, dest: BABYLON.Vector3) =  moveFromTo(duration, mesh, dest, mesh.position.asInstanceOf[BABYLON.Vector3])
-  def moveFrom(duration: Duration, mesh: BABYLON.Mesh, origin: BABYLON.Vector3) = moveFromTo(duration, mesh, mesh.position.asInstanceOf[BABYLON.Vector3], origin)
+  def moveTo(duration: Duration, mesh: BABYLON.Mesh, dest: BABYLON.Vector3) =  moveFromTo(duration, mesh, dest, mesh.position)
+  def moveFrom(duration: Duration, mesh: BABYLON.Mesh, origin: BABYLON.Vector3) = moveFromTo(duration, mesh, mesh.position, origin)
   def moveFromTo(duration: Duration, mesh: BABYLON.Mesh, dest: BABYLON.Vector3, origin: BABYLON.Vector3) = 
     LineMoveTweenParameters(duration, mesh, dest, origin)
 
   // TODO: move to util and add conversions to/from color/jtV3/bjsV3 & overloads for other vectors/colours
-  def v3lerp(v: Double, a: BABYLON.Vector3, b: BABYLON.Vector3) = BABYLON.Vector3(lerp(v, a.x, b.x), lerp(v, a.y, b.y), lerp(v, a.z, b.z))
-  def c3lerp(v: Double, a: BABYLON.Color3, b: BABYLON.Color3) = BABYLON.Color3(lerp(v, a.r, b.r), lerp(v, a.g, b.g), lerp(v, a.b, b.b))
+  import typings.babylonjs.global.BABYLON as BABYLON_IMPL
+  def v3lerp(v: Double, a: BABYLON.Vector3, b: BABYLON.Vector3) = BABYLON_IMPL.Vector3(lerp(v, a.x, b.x), lerp(v, a.y, b.y), lerp(v, a.z, b.z))
+  def c3lerp(v: Double, a: BABYLON.Color3, b: BABYLON.Color3) = BABYLON_IMPL.Color3(lerp(v, a.r, b.r), lerp(v, a.g, b.g), lerp(v, a.b, b.b))
 }

@@ -1,7 +1,7 @@
 package com.jarrahtechnology.kassite.shader
 
-import typings.babylonjs._
-import scala.scalajs._
+import typings.babylonjs.*
+import scala.scalajs.*
 
 enum ShaderParamType {
   case Uniform

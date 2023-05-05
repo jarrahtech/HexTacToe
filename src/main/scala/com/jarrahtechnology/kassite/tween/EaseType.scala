@@ -1,6 +1,6 @@
 package com.jarrahtechnology.kassite.tween
 
-import com.jarrahtechnology.util.Math._
+import com.jarrahtechnology.util.Math.*
 
 trait EaseType(val method: Interpolator)
 

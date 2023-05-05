@@ -1,15 +1,16 @@
 package hextactoe
 
-import scala.util.chaining._
+import scala.util.chaining.*
 import com.jarrahtechnology.hex.*
-import com.jarrahtechnology.hex.Direction._
-import BabylonJsHelper._
-import typings.babylonjs.global.*
+import com.jarrahtechnology.hex.Direction.*
+import BabylonJsHelper.*
+import typings.babylonjs.*
+import typings.babylonjs.global.BABYLON as BABYLON_IMPL
 import org.scalajs.dom
 import scalajs.js.Thenable.Implicits.thenable2future
 import concurrent.ExecutionContext.Implicits.global
 import com.jarrahtechnology.util.Vector2    
-import com.jarrahtechnology.kassite.shader._
+import com.jarrahtechnology.kassite.shader.*
 
 type HexModel = Option[Int]
 
@@ -36,7 +37,7 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
 
     def toPixel(c: Coord): BABYLON.Vector3 = {
         val p = display.toPixel(c) add origin
-        BABYLON.Vector3(p.x, p.y, 0)
+        BABYLON_IMPL.Vector3(p.x, p.y, 0)
     }
 
     // TODO: use generics so don't need to cast here!
@@ -72,7 +73,7 @@ object BabylonGrid {
     }
 
     // TODO: V2 & V3 can convert to typings.babylonjs.BABYLON.{V2, V3} and project
-    def projectFlatToBabylon3D(v: com.jarrahtechnology.util.Vector2) = BABYLON.Vector3(v.x, v.y, 0)
+    def projectFlatToBabylon3D(v: com.jarrahtechnology.util.Vector2) = BABYLON_IMPL.Vector3(v.x, v.y, 0)
 
     def calcRadiiOrigin(c: CoordSystem, sizeInHexes: Dimensions) = {
       def shift = {

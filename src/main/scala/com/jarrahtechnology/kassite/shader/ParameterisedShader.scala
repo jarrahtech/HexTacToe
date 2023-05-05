@@ -2,7 +2,8 @@ package com.jarrahtechnology.kassite.shader
 
 import org.scalablytyped.runtime.StringDictionary
 import typings.babylonjs.anon.PartialIShaderMaterialOptAttributes
-import typings.babylonjs.global.*
+import typings.babylonjs.*
+import typings.babylonjs.global.BABYLON as BABYLON_IMPL
 
 enum ShaderType(val storeSuffix: String, val pathKey: String) {
   case Vertex extends ShaderType("VertexShader", "vertex")
@@ -12,7 +13,7 @@ enum ShaderType(val storeSuffix: String, val pathKey: String) {
 sealed trait SubShader() {
   require(params.params.distinctBy(_.name).length==params.params.length, "no duplicate parameter names")
 
-  if (!BABYLON.Effect.ShadersStore.contains(name)) BABYLON.Effect.ShadersStore.addOne((s"${name}${shaderType.storeSuffix}", code))
+  if (!BABYLON_IMPL.Effect.ShadersStore.contains(name)) BABYLON_IMPL.Effect.ShadersStore.addOne((s"${name}${shaderType.storeSuffix}", code))
 
   def name: String
   def shaderType: ShaderType

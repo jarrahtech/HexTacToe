@@ -2,7 +2,8 @@ package hextactoe
 
 import org.scalajs.dom.{Event, Image}
 import org.scalablytyped.runtime.StringDictionary
-import typings.babylonjs.global.*
+import typings.babylonjs.*
+import typings.babylonjs.global.BABYLON as BABYLON_IMPL
 import typings.babylonjs.anon.PartialIShaderMaterialOptAttributes
 import com.jarrahtechnology.util.Vector2
 import com.jarrahtechnology.kassite.tween.MaterialTween
@@ -52,7 +53,7 @@ object BabylonJsHelper {
   val flatTopHexPoints = List(Vector2(0, root3/4d), Vector2(0.25, root3/2d), Vector2(0.75, root3/2d), Vector2(1, root3/4d), Vector2(0.75, 0), Vector2(0.25, 0))
 
    def drawFlatTopHexTexture(scene: BABYLON.Scene, resolution: Int): BABYLON.DynamicTexture = {
-    val texture = BABYLON.DynamicTexture("svgTexture", StringDictionary(("width", resolution), ("height", resolution*root3/2d)), scene, true)
+    val texture = BABYLON_IMPL.DynamicTexture("svgTexture", StringDictionary(("width", resolution), ("height", resolution*root3/2d)), scene, true)
     texture.hasAlpha = true 
     val ctx = texture.getContext()
     ctx.beginPath();
@@ -72,7 +73,7 @@ object BabylonJsHelper {
   import com.jarrahtechnology.kassite.shader._
 
   def drawTexture(scene: BABYLON.Scene, dimensions: Dimensions, texture: BABYLON.DynamicTexture): (BABYLON.Mesh, ParameterisedShaderMaterial) = {
-    val plane = BABYLON.MeshBuilder.CreatePlane("plane", dimensions.toPlane, scene).asInstanceOf[BABYLON.Mesh]
+    val plane = BABYLON_IMPL.MeshBuilder.CreatePlane("plane", dimensions.toPlane, scene).asInstanceOf[BABYLON.Mesh]
     val mat = Shaders.unlitTransparent.toMaterial(scene)
     mat.setTexture("tex", texture)
     mat.setFloat("opacity", 0.9)

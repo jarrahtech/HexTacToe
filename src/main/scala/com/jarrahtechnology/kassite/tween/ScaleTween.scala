@@ -1,6 +1,6 @@
 package com.jarrahtechnology.kassite.tween
 
-import typings.babylonjs.global.*
+import typings.babylonjs.*
 import scala.concurrent.duration._
 
 final case class ScaleTweenParameters(d: Duration, val mesh: BABYLON.Mesh, val dest: BABYLON.Vector3, val origin: BABYLON.Vector3, onFinished: Option[ScaleTweenParameters => Unit]) 
@@ -9,5 +9,5 @@ final case class ScaleTweenParameters(d: Duration, val mesh: BABYLON.Mesh, val d
 
 object ScaleTween {
   def scaleTo(duration: Duration, mesh: BABYLON.Mesh, dest: BABYLON.Vector3, onFinished: Option[ScaleTweenParameters => Unit]) = 
-    ScaleTweenParameters(duration, mesh, dest, mesh.scaling.asInstanceOf[BABYLON.Vector3], onFinished)
+    ScaleTweenParameters(duration, mesh, dest, mesh.scaling, onFinished)
 }

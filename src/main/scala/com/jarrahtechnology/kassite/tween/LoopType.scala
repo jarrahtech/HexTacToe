@@ -1,7 +1,7 @@
 package com.jarrahtechnology.kassite.tween
 
-import scala.concurrent.duration._
-import com.jarrahtechnology.util.Math._
+import scala.concurrent.duration.*
+import com.jarrahtechnology.util.Math.*
 
 type ProgressFn = Duration => Duration => Double
 type FinishedFn = Duration => Duration => Boolean

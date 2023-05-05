@@ -1,6 +1,6 @@
 package com.jarrahtechnology.kassite.tween
 
-import typings.babylonjs.global.*
+import typings.babylonjs.*
 import scala.concurrent.duration._
 
 final case class RotateAroundTweenParameters(d: Duration, val mesh: typings.babylonjs.BABYLON.AbstractMesh, val axis: BABYLON.Vector3) 

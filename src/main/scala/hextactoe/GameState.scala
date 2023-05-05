@@ -1,6 +1,7 @@
 package hextactoe
 
 import typings.babylonjs.*
+import typings.babylonjs.global.BABYLON as BABYLON_IMPL
 import com.jarrahtechnology.kassite.tween.*
 import com.jarrahtechnology.hex.*
 
@@ -11,7 +12,7 @@ final case class GameState(val scene: BABYLON.Scene,
   
   // TODO: move this to a lib?
   def currentHex = {
-    val ray = scene.createPickingRay(scene.pointerX, scene.pointerY, global.BABYLON.Matrix.Identity(), camera, false)
+    val ray = scene.createPickingRay(scene.pointerX, scene.pointerY, BABYLON_IMPL.Matrix.Identity(), camera, false)
     scene.pickWithRay(ray).pickedPoint match {
         case pt: BABYLON.Vector3 => grid.fromPixel(pt)
         case null => None

@@ -1,10 +1,9 @@
 package com.jarrahtechnology.kassite.tween
 
-import com.jarrahtechnology.util.Math._
-import typings.babylonjs.global.*
-
+import com.jarrahtechnology.util.Math.*
+import typings.babylonjs.*
 import scala.collection.mutable.HashSet
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 // TODO: think about delay end and  builder
 trait TweenParameters[T <: TweenParameters[_]](val duration: Duration, action: Double => Unit, val loop: LoopType, val ease: EaseType, val delay: Duration, val onStart: Option[T => Unit], val onFinish: Option[T => Unit]) {

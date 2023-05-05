@@ -1,7 +1,7 @@
 package hextactoe
 
 import scala.concurrent.duration.*
-import typings.babylonjs.global.*
+import typings.babylonjs.global.BABYLON as BABYLON_IMPL
 import com.jarrahtechnology.kassite.shader.*
 import com.jarrahtechnology.kassite.shader.ShaderParamType.*
 import com.jarrahtechnology.kassite.tween.*
@@ -28,9 +28,9 @@ object Fireworks {
   }
 
   def firework(state: GameState, size: Double, duration: Duration, delay: Duration, scale: Double) = {
-    val sphere = BABYLON.Mesh.CreateSphere("fireworks_sphere", 32, size, state.scene)
+    val sphere = BABYLON_IMPL.Mesh.CreateSphere("fireworks_sphere", 32, size, state.scene)
     sphere.convertToFlatShadedMesh()
-    sphere.position = BABYLON.Vector3(math.random()*6-3, math.random()*6-3, math.random()*10+5)
+    sphere.position = BABYLON_IMPL.Vector3(math.random()*6-3, math.random()*6-3, math.random()*10+5)
     val mat = fireworkShader.toMaterial(state.scene)
     sphere.material = mat
     sphere.scaling.setAll(0)
