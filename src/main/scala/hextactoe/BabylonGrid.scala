@@ -30,7 +30,7 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
     }
 
     // TODO: util method for V2 conversion
-    def fromPixel(p: typings.babylonjs.BABYLON.Vector3): Option[(HexModel, Coord)] = {
+    def fromPixel(p: BABYLON.Vector3): Option[(HexModel, Coord)] = {
         val coord = display.fromPixel(Vector2(p.x, p.y) subtract origin)
         display.grid.hexAt(display.fromPixel(Vector2(p.x, p.y) subtract origin)).map((_, coord))
     }

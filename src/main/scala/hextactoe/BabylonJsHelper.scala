@@ -4,13 +4,13 @@ import org.scalajs.dom.{Event, Image}
 import org.scalablytyped.runtime.StringDictionary
 import typings.babylonjs.*
 import typings.babylonjs.global.BABYLON as BABYLON_IMPL
-import typings.babylonjs.anon.PartialIShaderMaterialOptAttributes
+import typings.babylonjs.anon.{PartialIShaderMaterialOptAttributes, SourcePlane}
 import com.jarrahtechnology.util.Vector2
 import com.jarrahtechnology.kassite.tween.MaterialTween
 
 final case class Dimensions(val width: Double, val height: Double) {
     def toOptions = StringDictionary(("width", width), ("height", height))
-    def toPlane = typings.babylonjs.anon.SourcePlane.MutableBuilder(typings.babylonjs.anon.SourcePlane()).setWidth(width).setHeight(height)
+    def toPlane = SourcePlane.MutableBuilder(SourcePlane()).setWidth(width).setHeight(height)
     def toVector2 = Vector2(width, height)
 }
 object Dimensions {

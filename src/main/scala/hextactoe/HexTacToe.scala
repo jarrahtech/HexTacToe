@@ -1,18 +1,13 @@
 package hextactoe
 
-
-
 import org.scalajs.dom
 import org.scalajs.dom.window
-import typings.babylonjs
+import typings.babylonjs.*
 import typings.babylonjs.global.BABYLON as BABYLON_IMPL
 import BabylonJsHelper.*
 import com.jarrahtechnology.hex.*
 import scala.concurrent.duration.*
 import com.jarrahtechnology.kassite.tween.*
-
-
-// TODO: cleanup up imports - typings.babylonjs.BABYLON & typings.babylonjs.global.BABYLON
 
 @main
 def HexTacToe(): Unit = { 
@@ -38,13 +33,13 @@ def HexTacToe(): Unit = {
 
 def displayText(text: String) = dom.document.getElementById("turn").innerHTML = text
 
-def explode(scene: typings.babylonjs.BABYLON.Scene) = BABYLON_IMPL.ParticleHelper.CreateAsync("explosion", scene).`then`(particles => {
+def explode(scene: BABYLON.Scene) = BABYLON_IMPL.ParticleHelper.CreateAsync("explosion", scene).`then`(particles => {
     particles.systems.foreach(_.disposeOnStop = true)
     particles.start();
   })
 
 def createScene() = {
-  val canvas = dom.document.getElementById("renderCanvas").asInstanceOf[typings.babylonjs.HTMLCanvasElement]
+  val canvas = dom.document.getElementById("renderCanvas").asInstanceOf[HTMLCanvasElement]
   val engine = new BABYLON_IMPL.Engine(canvas, true) // Generate the BABYLON 3D engine
   val scene = new BABYLON_IMPL.Scene(engine)
   scene.clearColor = BABYLON_IMPL.Color4(0,0,0,1)
