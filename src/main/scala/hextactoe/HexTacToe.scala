@@ -2,8 +2,8 @@ package hextactoe
 
 import org.scalajs.dom
 import org.scalajs.dom.window
-import typings.babylonjs.*
-import typings.babylonjs.global.BABYLON as BABYLON_IMPL
+import facade.babylonjs.*
+import facade.babylonjs.global.BABYLON as BABYLON_IMPL
 import BabylonJsHelper.*
 import com.jarrahtechnology.hex.*
 import scala.concurrent.duration.*

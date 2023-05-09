@@ -4,8 +4,8 @@ import scala.util.chaining.*
 import com.jarrahtechnology.hex.*
 import com.jarrahtechnology.hex.Direction.*
 import BabylonJsHelper.*
-import typings.babylonjs.*
-import typings.babylonjs.global.BABYLON as BABYLON_IMPL
+import facade.babylonjs.*
+import facade.babylonjs.global.BABYLON as BABYLON_IMPL
 import org.scalajs.dom
 import scalajs.js.Thenable.Implicits.thenable2future
 import concurrent.ExecutionContext.Implicits.global
@@ -31,12 +31,12 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
 
     // TODO: util method for V2 conversion
     def fromPixel(p: BABYLON.Vector3): Option[(HexModel, Coord)] = {
-        val coord = display.fromPixel(Vector2(p.x, p.y) subtract origin)
-        display.grid.hexAt(display.fromPixel(Vector2(p.x, p.y) subtract origin)).map((_, coord))
+        val coord = display.fromPixel(Vector2(p.x, p.y) subtractPiecewise origin)
+        display.grid.hexAt(display.fromPixel(Vector2(p.x, p.y) subtractPiecewise origin)).map((_, coord))
     }
 
     def toPixel(c: Coord): BABYLON.Vector3 = {
-        val p = display.toPixel(c) add origin
+        val p = display.toPixel(c) addPiecewise origin
         BABYLON_IMPL.Vector3(p.x, p.y, 0)
     }
 
@@ -68,7 +68,7 @@ object BabylonGrid {
       val hexTexture = drawFlatTopHexTexture(scene, resolution)
       val origin = calcRadiiOrigin(coords, sizeInHexes) multiply hexRadius
       BabylonGrid(display, (0 until sizeInHexes.width.toInt).toList.map(c => (0 until sizeInHexes.height.toInt).toList.map(r => {
-        drawTexture(scene, dim, hexTexture).tap(_._1.position = projectFlatToBabylon3D(origin add display.toPixel(Coord(c, r))))._2
+        drawTexture(scene, dim, hexTexture).tap(_._1.position = projectFlatToBabylon3D(origin addPiecewise display.toPixel(Coord(c, r))))._2
       })), origin)
     }
 
@@ -84,6 +84,6 @@ object BabylonGrid {
         } else Vector2.zero
       }
       // TODO: put operators back in V2/3 in util -> add goes to addPiecewise
-      (shift add c.hexRadiiDimensions subtract c.rectangularGridRadiiDimensions(sizeInHexes.width.toInt, sizeInHexes.height.toInt)) divide 2f
+      (shift addPiecewise c.hexRadiiDimensions subtractPiecewise c.rectangularGridRadiiDimensions(sizeInHexes.width.toInt, sizeInHexes.height.toInt)) divide 2f
     }
 }

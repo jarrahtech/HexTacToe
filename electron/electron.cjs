@@ -7,10 +7,12 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1440,
     height: 1080,
+    frame: false,
     //webPreferences: {
     //  preload: path.join(__dirname, 'preload.js')
     //}
   })
+  mainWindow.setMenuBarVisibility(false)
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')

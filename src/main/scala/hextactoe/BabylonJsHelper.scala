@@ -2,9 +2,9 @@ package hextactoe
 
 import org.scalajs.dom.{Event, Image}
 import org.scalablytyped.runtime.StringDictionary
-import typings.babylonjs.*
-import typings.babylonjs.global.BABYLON as BABYLON_IMPL
-import typings.babylonjs.anon.{PartialIShaderMaterialOptAttributes, SourcePlane}
+import facade.babylonjs.*
+import facade.babylonjs.global.BABYLON as BABYLON_IMPL
+import facade.babylonjs.anon.{PartialIShaderMaterialOptAttributes, SourcePlane}
 import com.jarrahtechnology.util.Vector2
 import com.jarrahtechnology.kassite.tween.MaterialTween
 
@@ -59,10 +59,10 @@ object BabylonJsHelper {
     ctx.beginPath();
     ctx.lineWidth = resolution/32
     // TODO: Vector2.addToAll(Double) and use here
-    val pts = flatTopHexPoints.map(_.multiply(resolution-ctx.lineWidth*2).add(Vector2(ctx.lineWidth, ctx.lineWidth))) 
+    val pts = flatTopHexPoints.map(_.multiply(resolution-ctx.lineWidth*2).addToAll(ctx.lineWidth)) 
     ctx.moveTo(pts.last.x, pts.last.y)
     pts.foreach(p => ctx.lineTo(p.x, p.y))
-    val wrap = pts.last.add(pts.head.subtract(pts.last).multiply(0.1f))
+    val wrap = pts.last.addPiecewise(pts.head.subtractPiecewise(pts.last).multiply(0.1f))
     ctx.lineTo(wrap.x, wrap.y)    
     ctx.strokeStyle = "white"  
     ctx.stroke()

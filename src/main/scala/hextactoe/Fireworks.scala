@@ -1,7 +1,7 @@
 package hextactoe
 
 import scala.concurrent.duration.*
-import typings.babylonjs.global.BABYLON as BABYLON_IMPL
+import facade.babylonjs.global.BABYLON as BABYLON_IMPL
 import com.jarrahtechnology.kassite.shader.*
 import com.jarrahtechnology.kassite.shader.ShaderParamType.*
 import com.jarrahtechnology.kassite.tween.*

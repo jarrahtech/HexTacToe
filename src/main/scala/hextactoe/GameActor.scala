@@ -1,8 +1,8 @@
 package hextactoe
 
 import scala.concurrent.duration.*
-import typings.babylonjs.*
-import typings.babylonjs.global.BABYLON as BABYLON_IMPL
+import facade.babylonjs.*
+import facade.babylonjs.global.BABYLON as BABYLON_IMPL
 import com.jarrahtechnology.kassite.tween.*
 
 trait GameActor {

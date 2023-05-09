@@ -32,12 +32,13 @@ lazy val hextactoe = project.in(file("."))
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoPackage := "hextactoe",
 
-    githubOwner := "jarrahtech",
-    githubRepository := "hex",
-
     resolvers ++= Resolver.sonatypeOssRepos("public"),
     resolvers += Resolver.githubPackages("jarrahtech"),
 
+    githubOwner := "jarrahtech",
+    githubRepository := "hextactoe",
+
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.4.0",
-    libraryDependencies += "com.jarrahtechnology" %%% "hex" % "0.3.0",
+    libraryDependencies += "com.jarrahtechnology" %%% "hex" % "0.3.1",
+    libraryDependencies += "com.jarrahtechnology" %%% "kassite" % "0.1.1",
   )
