@@ -34,8 +34,12 @@ object Fireworks {
     val mat = fireworkShader.toMaterial(state.scene)
     sphere.material = mat
     sphere.scaling.setAll(0)
-    val t = MaterialTween.shaderFloatParameter(duration, delay, mat, "time", 8, Some(_ => sphere.scaling.setAll(1)), Some(_ => sphere.dispose()))
-            .runOn(state.tweenMgr)
-    t.setTimeScale(scale)
+    InterpTweenBuilder().withAction(InterpFunction.shaderParam(mat, "time", 0, 8))     
+          .withDuration(duration)
+          .withDelay(delay)
+          .withOnStart(_ => sphere.scaling.setAll(1))
+          .withOnFinish(_ => sphere.dispose())
+          .runOn(state.tweenMgr)
+          .setTimeScale(scale)
   }
 }

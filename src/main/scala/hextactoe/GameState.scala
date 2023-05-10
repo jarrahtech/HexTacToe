@@ -8,7 +8,7 @@ import com.jarrahtechnology.hex.*
 final case class GameState(val scene: BABYLON.Scene,
                  val camera: BABYLON.Camera,
                  val grid: BabylonGrid[_]) {
-  val tweenMgr = TweenManager(scene)           
+  val tweenMgr = TweenManager.frameTime(scene)           
   
   // TODO: move this to a lib?
   def currentHex = {

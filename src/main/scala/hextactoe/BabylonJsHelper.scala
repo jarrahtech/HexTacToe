@@ -6,13 +6,15 @@ import facade.babylonjs.*
 import facade.babylonjs.global.BABYLON as BABYLON_IMPL
 import facade.babylonjs.anon.{PartialIShaderMaterialOptAttributes, SourcePlane}
 import com.jarrahtechnology.util.Vector2
-import com.jarrahtechnology.kassite.tween.MaterialTween
+import com.jarrahtechnology.kassite.shader.*
 
 final case class Dimensions(val width: Double, val height: Double) {
     def toOptions = StringDictionary(("width", width), ("height", height))
     def toPlane = SourcePlane.MutableBuilder(SourcePlane()).setWidth(width).setHeight(height)
-    def toVector2 = Vector2(width, height)
+    def toJtV2 = Vector2(width, height)
+    def toBabylonV2 = BABYLON_IMPL.Vector2(width, height)
 }
+
 object Dimensions {
   def from(v: Vector2) = Dimensions(v.x, v.y)
   def square(length: Double) = Dimensions(length, length)
@@ -50,16 +52,16 @@ object BabylonJsHelper {
 */
   // TODO: move to hex library?
   val root3 = math.sqrt(3)
-  val flatTopHexPoints = List(Vector2(0, root3/4d), Vector2(0.25, root3/2d), Vector2(0.75, root3/2d), Vector2(1, root3/4d), Vector2(0.75, 0), Vector2(0.25, 0))
+  val flatTopHexPixelPoints = List(Vector2(0, root3/4d), Vector2(0.25, root3/2d), Vector2(0.75, root3/2d), Vector2(1, root3/4d), Vector2(0.75, 0), Vector2(0.25, 0))
+  val pointyTopHexPixelPoints = List(Vector2(0, 0.25), Vector2(0, 0.75), Vector2(root3/4d, 1), Vector2(root3/2d, 0.75), Vector2(root3/2d, 0.25), Vector2(root3/4d, 0))
 
-   def drawFlatTopHexTexture(scene: BABYLON.Scene, resolution: Int): BABYLON.DynamicTexture = {
+  def drawFlatTopHexTexture(scene: BABYLON.Scene, resolution: Int): BABYLON.DynamicTexture = {
     val texture = BABYLON_IMPL.DynamicTexture("svgTexture", StringDictionary(("width", resolution), ("height", resolution*root3/2d)), scene, true)
     texture.hasAlpha = true 
     val ctx = texture.getContext()
     ctx.beginPath();
     ctx.lineWidth = resolution/32
-    // TODO: Vector2.addToAll(Double) and use here
-    val pts = flatTopHexPoints.map(_.multiply(resolution-ctx.lineWidth*2).addToAll(ctx.lineWidth)) 
+    val pts = flatTopHexPixelPoints.map(_.multiply(resolution-ctx.lineWidth*2).addToAll(ctx.lineWidth)) 
     ctx.moveTo(pts.last.x, pts.last.y)
     pts.foreach(p => ctx.lineTo(p.x, p.y))
     val wrap = pts.last.addPiecewise(pts.head.subtractPiecewise(pts.last).multiply(0.1f))
@@ -68,9 +70,7 @@ object BabylonJsHelper {
     ctx.stroke()
     texture.update()
     texture
-   }
-
-  import com.jarrahtechnology.kassite.shader._
+  }
 
   def drawTexture(scene: BABYLON.Scene, dimensions: Dimensions, texture: BABYLON.DynamicTexture): (BABYLON.Mesh, ParameterisedShaderMaterial) = {
     val plane = BABYLON_IMPL.MeshBuilder.CreatePlane("plane", dimensions.toPlane, scene).asInstanceOf[BABYLON.Mesh]

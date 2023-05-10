@@ -22,7 +22,14 @@ def HexTacToe(): Unit = {
       case Some((cc, _)) if c==cc => None // already pulsing do nothing
       case Some((cc, t)) => { stopPulse; Some(c) }
       case None => Some(c) 
-    } foreach(c => lastTween = state.grid.mesh(c).map(m => (c, MaterialTween.shaderColor3Parameter(Duration(300, MILLISECONDS), m, "color", Player.colour).runOn(state.tweenMgr))))
+    } foreach(c => lastTween = state.grid.mesh(c).map(m => (c, {
+      val originalColor = m.getColor3("color").getOrElse(BABYLON_IMPL.Color3(1,1,1))
+      InterpTweenBuilder().withAction(InterpFunction.shaderParam(m, "color", originalColor, Player.colour))     
+          .withDuration(Duration(300, MILLISECONDS))
+          .withLoop(LoopType.PingPongForever)
+          .withOnFinish(_ => m.setColor3("color", originalColor))
+          .runOn(state.tweenMgr)
+    })))
   
   scene.onPointerObservable.add((pi, es) => (state.activeActor, state.currentHex) match {
     case (Player, Some((None, c))) if (pi.event.button<0) => pulse(c) // real unclaimed hex and player hovering over it on their turn

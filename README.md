@@ -30,7 +30,7 @@ It is not fancy, it just shows how to get all these technologies to work togethe
 
 ## Notes
 
-* It appears that no extension methods are allowed in Scala.js
+* It appears that no extension methods can be exported in Scala.js, so not using them in libraries
 * Got a weird error with some valid Scala code making use of generics. Adding a `println` fixed the issue (seriously :/ - reminded me of my old C programming days!). Decided just to remove the generics. It is the `run` method in TweenManager if you want to try fixing it
 * When loading a mesh, ensure that the name provided matches the name inside the loaded file
 * base folder? [[check latest idea]]

@@ -16,16 +16,20 @@ trait GameActor {
   def startTurn: GameState => Unit
 
   val meshesUrl = s"${BuildInfo.baseUrl}SpaceKit_Kenney/"
-  def createActorMarker(state: GameState, target: BABYLON.Vector3, onFinished: ScaleTweenParameters => Unit) = {
+
+  def createActorMarker(state: GameState, target: BABYLON.Vector3, onFinished: InterpTweenParameters => Unit) = {
     BABYLON_IMPL.SceneLoader.ImportMesh(state.activeActor.meshName, meshesUrl, state.activeActor.meshFile, state.scene, (newMeshes, _, _, _, _, _, _) => { 
         val parent = new BABYLON_IMPL.Mesh("", state.scene)
         meshSetup(newMeshes(0))
         parent.addChild(newMeshes(0)) 
         parent.position = target 
-        parent.scaling = BABYLON_IMPL.Vector3(0,0,0)
-        val t =RotationTween.rotateAround(Duration(4, SECONDS), parent, BABYLON_IMPL.Vector3(0,0,1), state.tweenMgr)
-        t.start
-        ScaleTween.scaleTo(Duration(300, MILLISECONDS), parent, BABYLON_IMPL.Vector3(1,1,1), Some(onFinished)).runOn(state.tweenMgr)
+        parent.scaling = BABYLON_IMPL.Vector3.Zero()
+        DeltaTweenParameters(DeltaFunction.rotateAround(parent, Duration(4, SECONDS), BABYLON_IMPL.Vector3(0,0,1)))
+          .runOn(state.tweenMgr)      
+        InterpTweenBuilder().withAction(InterpFunction.scale(parent, parent.scaling, BABYLON_IMPL.Vector3.One()))     
+          .withDuration(Duration(300, MILLISECONDS))
+          .withOnFinish(onFinished)
+          .runOn(state.tweenMgr)
     }, {}, {}, {})
   }
 }

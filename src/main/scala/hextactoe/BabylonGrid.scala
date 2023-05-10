@@ -11,6 +11,7 @@ import scalajs.js.Thenable.Implicits.thenable2future
 import concurrent.ExecutionContext.Implicits.global
 import com.jarrahtechnology.util.Vector2    
 import com.jarrahtechnology.kassite.shader.*
+import com.jarrahtechnology.kassite.util.VectorConvert.*
 
 type HexModel = Option[Int]
 
@@ -23,22 +24,13 @@ val lines = List(DirectionPath(List(None, Some(North), Some(North))),
 
 // TODO: should HexGridDisplay move in Babylon tools (from hex library)
 final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel, C], meshes: List[List[ParameterisedShaderMaterial]], val origin: Vector2) {
-    def deriveBoundingBox = {
-      val w = display.grid.coords.hexRadiiWidth*display.hexRadius/2d
-      val h = display.grid.coords.hexRadiiHeight*display.hexRadius/2d
-      (-w+display.grid.coords.rectangularGridRadiiWidth(meshes.size, meshes(0).size), -w, -h+display.grid.coords.rectangularGridRadiiHeight(meshes.size, meshes(0).size), -h);
-    }
 
-    // TODO: util method for V2 conversion
     def fromPixel(p: BABYLON.Vector3): Option[(HexModel, Coord)] = {
-        val coord = display.fromPixel(Vector2(p.x, p.y) subtractPiecewise origin)
-        display.grid.hexAt(display.fromPixel(Vector2(p.x, p.y) subtractPiecewise origin)).map((_, coord))
+      val coord = display.fromPixel(toV2Flat(p) subtractPiecewise origin)
+      display.grid.hexAt(coord).map((_, coord))
     }
 
-    def toPixel(c: Coord): BABYLON.Vector3 = {
-        val p = display.toPixel(c) addPiecewise origin
-        BABYLON_IMPL.Vector3(p.x, p.y, 0)
-    }
+    def toPixel(c: Coord): BABYLON.Vector3 = toV3Flat(display.toPixel(c) addPiecewise origin)
 
     // TODO: use generics so don't need to cast here!
     def claim(actor: GameActor, c: Coord) = {
@@ -68,12 +60,9 @@ object BabylonGrid {
       val hexTexture = drawFlatTopHexTexture(scene, resolution)
       val origin = calcRadiiOrigin(coords, sizeInHexes) multiply hexRadius
       BabylonGrid(display, (0 until sizeInHexes.width.toInt).toList.map(c => (0 until sizeInHexes.height.toInt).toList.map(r => {
-        drawTexture(scene, dim, hexTexture).tap(_._1.position = projectFlatToBabylon3D(origin addPiecewise display.toPixel(Coord(c, r))))._2
+        drawTexture(scene, dim, hexTexture).tap(_._1.position = toV3Flat(origin addPiecewise display.toPixel(Coord(c, r))))._2
       })), origin)
     }
-
-    // TODO: V2 & V3 can convert to typings.babylonjs.BABYLON.{V2, V3} and project
-    def projectFlatToBabylon3D(v: com.jarrahtechnology.util.Vector2) = BABYLON_IMPL.Vector3(v.x, v.y, 0)
 
     def calcRadiiOrigin(c: CoordSystem, sizeInHexes: Dimensions) = {
       def shift = {
@@ -83,7 +72,33 @@ object BabylonGrid {
           Vector2(0, c.hexRadiiHeight)
         } else Vector2.zero
       }
-      // TODO: put operators back in V2/3 in util -> add goes to addPiecewise
+
       (shift addPiecewise c.hexRadiiDimensions subtractPiecewise c.rectangularGridRadiiDimensions(sizeInHexes.width.toInt, sizeInHexes.height.toInt)) divide 2f
     }
+}
+
+final case class RectangularHexGridDisplay[Model, View, C <: CoordSystem, G <: RectangularHexGrid[(Model, View), C]](val grid: G, val hexRadius: Double, position: Vector2) {
+    
+  def fromPixel(pos: Vector2) = grid.coords.fromRadii((pos subtractPiecewise pixelCenter).divide(hexRadius))
+  def hexFromPixel(pos: Vector2) = {
+    val coord = fromPixel(pos)
+    (coord, grid.hexAt(coord))
+  }
+  def toPixel(coord: Coord) = grid.coords.toRadii(coord).multiply(hexRadius) addPiecewise pixelCenter
+
+  val pixelCenter = (gridCentreToOriginInRadii multiply hexRadius) addPiecewise position
+  def gridCentreToOriginInRadii = { // shift from the center of the grid to the center of the (0,0) hex
+      def shift = 
+        if (grid.coords.isHorizontal && grid.coords.isEven && grid.numRows>1) {
+          Vector2(grid.coords.hexRadiiWidth, 0)
+        } else if (!grid.coords.isHorizontal && grid.coords.isEven && grid.numColumns>1) {
+          Vector2(0, grid.coords.hexRadiiHeight)
+        } else Vector2.zero
+
+      (shift addPiecewise grid.coords.hexRadiiDimensions subtractPiecewise grid.coords.rectangularGridRadiiDimensions(grid.numColumns, grid.numRows)) divide 2f
+    }
+}
+
+object RectangularHexGridDisplay {
+
 }
