@@ -15,7 +15,7 @@ trait GameActor {
   def endAction: GameState => Unit
   def startTurn: GameState => Unit
 
-  val meshesUrl = s"${BuildInfo.baseUrl}SpaceKit_Kenney/"
+  val meshesUrl = s"${BuildInfo.baseUrl.trim()}SpaceKit_Kenney/"
 
   def createActorMarker(state: GameState, target: BABYLON.Vector3, onFinished: InterpTweenParameters => Unit) = {
     BABYLON_IMPL.SceneLoader.ImportMesh(state.activeActor.meshName, meshesUrl, state.activeActor.meshFile, state.scene, (newMeshes, _, _, _, _, _, _) => { 

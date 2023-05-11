@@ -13,24 +13,15 @@ import com.jarrahtechnology.util.Vector2
 import com.jarrahtechnology.kassite.shader.*
 import com.jarrahtechnology.kassite.util.VectorConvert.*
 
-type HexModel = Option[Int]
-
-val lines = List(DirectionPath(List(None, Some(North), Some(North))),
-                DirectionPath(List(None, Some(NorthWest), Some(NorthWest))),
-                DirectionPath(List(None, Some(SouthWest), Some(SouthWest))),
-                DirectionPath(List(None, Some(South), Some(South))),
-                DirectionPath(List(None, Some(SouthEast), Some(SouthEast))),
-                DirectionPath(List(None, Some(NorthEast), Some(NorthEast))))
-
 final case class HexGridDisplay[H, C <: CoordSystem](val grid: HexGrid[H, C], val hexRadius: Double) {
   def fromPixel(pos: Vector2) = grid.coords.fromRadii(pos.divide(hexRadius))
   def hexFromPixel(pos: Vector2) = grid.hexAt(fromPixel(pos))
   def toPixel(coord: Coord) = grid.coords.toRadii(coord).multiply(hexRadius)
 }
 
-final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel, C], meshes: List[List[ParameterisedShaderMaterial]], val origin: Vector2) {
+final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[Option[Int], C], meshes: List[List[ParameterisedShaderMaterial]], val origin: Vector2) {
 
-    def fromPixel(p: BABYLON.Vector3): Option[(HexModel, Coord)] = {
+    def fromPixel(p: BABYLON.Vector3): Option[(Option[Int], Coord)] = {
       val coord = display.fromPixel(toV2Flat(p) subtractPiecewise origin)
       display.grid.hexAt(coord).map((_, coord))
     }
@@ -38,9 +29,16 @@ final case class BabylonGrid[C <: CoordSystem](display: HexGridDisplay[HexModel,
     def toPixel(c: Coord): BABYLON.Vector3 = toV3Flat(display.toPixel(c) addPiecewise origin)
 
     def claim(actor: GameActor, c: Coord) = {
-        display.grid.asInstanceOf[MutableRectangularHexGrid[HexModel, C]].set(c, Some(actor.id))
+        display.grid.asInstanceOf[MutableRectangularHexGrid[Option[Int], C]].set(c, Some(actor.id))
         meshes(c.column)(c.row).setColor3("color", actor.colour)
     }
+
+    val lines = List(DirectionPath(List(None, Some(North), Some(North))),
+                DirectionPath(List(None, Some(NorthWest), Some(NorthWest))),
+                DirectionPath(List(None, Some(SouthWest), Some(SouthWest))),
+                DirectionPath(List(None, Some(South), Some(South))),
+                DirectionPath(List(None, Some(SouthEast), Some(SouthEast))),
+                DirectionPath(List(None, Some(NorthEast), Some(NorthEast))))
 
     def isDraw = display.grid.filter(_._2.isEmpty).isEmpty
     val linePaths = lines.map(_.toPath(display.grid))

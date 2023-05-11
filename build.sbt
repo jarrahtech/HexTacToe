@@ -28,7 +28,7 @@ lazy val hextactoe = project.in(file("."))
     },
     externalNpm := baseDirectory.value,
 
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "baseUrl" -> sys.env.getOrElse("BASE_URL", "/")),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "baseUrl" -> sys.env.getOrElse("BASE_URL", "/").trim()),
     buildInfoOptions += BuildInfoOption.BuildTime,
     buildInfoPackage := "hextactoe",
 
