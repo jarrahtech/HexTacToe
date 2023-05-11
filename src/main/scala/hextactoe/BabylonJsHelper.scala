@@ -7,6 +7,7 @@ import facade.babylonjs.global.BABYLON as BABYLON_IMPL
 import facade.babylonjs.anon.{PartialIShaderMaterialOptAttributes, SourcePlane}
 import com.jarrahtechnology.util.Vector2
 import com.jarrahtechnology.kassite.shader.*
+import com.jarrahtechnology.hex.{root3, flatTopHexPixelPoints}
 
 final case class Dimensions(val width: Double, val height: Double) {
     def toOptions = StringDictionary(("width", width), ("height", height))
@@ -50,10 +51,6 @@ object BabylonJsHelper {
     plane
   }
 */
-  // TODO: move to hex library?
-  val root3 = math.sqrt(3)
-  val flatTopHexPixelPoints = List(Vector2(0, root3/4d), Vector2(0.25, root3/2d), Vector2(0.75, root3/2d), Vector2(1, root3/4d), Vector2(0.75, 0), Vector2(0.25, 0))
-  val pointyTopHexPixelPoints = List(Vector2(0, 0.25), Vector2(0, 0.75), Vector2(root3/4d, 1), Vector2(root3/2d, 0.75), Vector2(root3/2d, 0.25), Vector2(root3/4d, 0))
 
   def drawFlatTopHexTexture(scene: BABYLON.Scene, resolution: Int): BABYLON.DynamicTexture = {
     val texture = BABYLON_IMPL.DynamicTexture("svgTexture", StringDictionary(("width", resolution), ("height", resolution*root3/2d)), scene, true)

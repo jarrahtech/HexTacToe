@@ -26,20 +26,26 @@ It is not fancy, it just shows how to get all these technologies to work togethe
 
 ## Setup
 
-`npm install`
+1. First do `npm install` which should install the javascript packages required.
+2. `sbt fastLinkJS` will build all the files for running it in dev
+3. `npm run dev` (on a webpage) and `npm run dev:electron` (as an executable) will run a dev version
+
+Also:
+
+* if you have permission, `npm run deploy` will upload to github pages
+* `npm run package` will create an electron executable of the game under the folder `electron/out`
 
 ## Notes
 
-* It appears that no extension methods can be exported in Scala.js, so not using them in libraries
-* Got a weird error with some valid Scala code making use of generics. Adding a `println` fixed the issue (seriously :/ - reminded me of my old C programming days!). Decided just to remove the generics. It is the `run` method in TweenManager if you want to try fixing it
+* It appears that extension methods can not be exported in Scala.js, so they are not used in libraries
 * When loading a mesh, ensure that the name provided matches the name inside the loaded file
-* base folder? [[check latest idea]]
-* `typings.babylonjs.*` vs `typings.babylonjs.global.*`
-* Why proxy ShaderMaterial
-* ParameterisedShaderMaterial and overload problems
+* `typings.babylonjs.*` contains Babylon.js' interfaces while `typings.babylonjs.global.*` contains the concrete classes (this took me far to long to work out). To make this clearer, latter is imported as `BABYLON_IMPL` in the scala code
+* ShaderMaterial has been proxied with ParameterisedShaderMaterial so that the values of the shader parameters can have getters as well as setter. This is useful for tweening.
+* Some of the proxied setter methods in ParameterisedShaderMaterial are commented out (now in the kassite library). This is because compiler errors resulted if any of them were active - they are ambigous which is probably something to do with how these parameters are seen in javascript. So 2x2 & 3x3 matrices canbe be used by this class.
 * `@js.native @JSImport("/SpaceKit_Kenney", JSImport.Default); val meshesUrl: String = js.native` handles Vite's base url when pointing to a file, but does not seem to like folders (as used by `BABYLON.SceneLoader.ImportMesh`) so have to import via writing the base path to the environment inside vite config, then picking that up environment variable inside sbt and writing to a generated file (using sbt-buildinfo) and then using that inside scala
-* electron-forge couldn't get it to work as it requires packaging from the root directory and disallows setting the "dir" config option
-* in package.json `"main": "electron.cjs"` is the electron build entry point, should be ignored by the web build
-* electron gets confused by baseURL set to / (tries to load out of the root of the filesystem), so catch and rewrite this as blank in `vite.config.js`
-* electron going to network for babylon js & bootstrap stylesheet, probably want to include these locally
-* electron wants a CSP set (see the electron.cjs files) & https://www.electronjs.org/docs/latest/tutorial/security#7-define-a-content-security-policy
+* I could not get electron-forge to work as it requires packaging from the root directory and disallows setting the "dir" config option
+* In `package.json` the line `"main": "electron.cjs"` is the electron.js build entry point, should be ignored by the web build
+* electron.js gets confused by baseURL set to `/` (it tries to load out of the root of the filesystem), so catch this and rewrite it as blank in `vite.config.js`
+* electron.js goes to the network for babylon javascript file & bootstrap stylesheet, probably want to include these locally in the build
+* electron.js wants a Content Security Policy (CSP) set (it is currently set in the electron.cjs files) see [here for more info](https://www.electronjs.org/docs/latest/tutorial/security#7-define-a-content-security-policy)
+* BabylonGrid is a bit of mess, could probably do this a lot better, but it works
