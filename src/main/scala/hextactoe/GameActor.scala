@@ -42,7 +42,7 @@ object Player extends GameActor {
   val meshSetup = m => { m.rotate(BABYLON_IMPL.Vector3(1,0,0), math.Pi/6); m.scaling.scaleInPlace(0.12) }
   val turnMsg = s"""<span>It is </span><span style="whiteSpace: nowrap; color: ${colour.toHexString()}">your</span><span> turn, click the hex you want to claim.</span>"""
   val endAction = state => { displayText("Victory!! &#x1F600;"); Fireworks.fireworks(state, 20) }
-  def startTurn = _ => {}
+  def startTurn = _ => selectBlock = false
 }
 
 object Opponent extends GameActor {

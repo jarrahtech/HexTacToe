@@ -1,6 +1,6 @@
 # HexTacToe
 
-Simple hex based tic-tac-toe game as a Scala.js and Babylon.js proof-of-concept. Also includes Vite.js for quick dev turnaround and Electron.js for native packaging.
+Simple hex based tic-tac-toe game as a Scala.js and Babylon.js proof-of-concept. Also includes Vite.js for quick dev turnaround and Electron.js for native packaging. ScalablyTyped was used to create the Babylon.js facade.
 
 [See the game running here](https://www.jarrahtechnology.com/HexTacToe/)
 
@@ -20,6 +20,7 @@ It is not fancy, it just shows how to get all these technologies to work togethe
 * [Scala.js](https://www.scala-js.org/doc/tutorial/scalajs-vite.html)
 * [Vite](https://vitejs.dev/guide/)
 * [Babylon.js](https://doc.babylonjs.com/journey/theFirstStep)
+* [ScalablyTyped](https://scalablytyped.org/docs/library-developer)
 * [Electron.js](https://www.electronjs.org/docs/latest/tutorial/quick-start)
 * [Electron-Packager](https://electron.github.io/electron-packager/main/index.html)
 * [Deploy to Github Pages (use the first comment, not the article itself :)](https://dev.to/shashannkbawa/deploying-vite-app-to-github-pages-3ane#comment-22iei)
@@ -38,6 +39,7 @@ Also:
 
 ## Notes
 
+* The Babylon.js code was imported in Scala.js using ScalablyTyped. That facade is in a separate library (`libraryDependencies += "com.jarrahtechnology" %%% "babylonjsfacade" % "6.2.0"` for the 6.2 release of Babylon.js) so that all the different libraries that use it don't need to import and compile it repeatedly (it is quite large).
 * It appears that extension methods can not be exported in Scala.js, so I have not used them
 * When loading a mesh, ensure that the name provided matches the name inside the loaded file (it may not be what you expect)
 * `typings.babylonjs.*` contains Babylon.js' interfaces while `typings.babylonjs.global.*` contains the concrete classes (this took me far to long to work out). To make this clearer, the latter is imported as `BABYLON_IMPL` in the scala code

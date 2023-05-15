@@ -9,6 +9,8 @@ import com.jarrahtechnology.hex.*
 import scala.concurrent.duration.*
 import com.jarrahtechnology.kassite.tween.*
 
+var selectBlock = false
+
 @main
 def HexTacToe(): Unit = { 
   val (scene, camera) = createScene()
@@ -31,12 +33,14 @@ def HexTacToe(): Unit = {
           .runOn(state.tweenMgr)
     })))
   
-  scene.onPointerObservable.add((pi, es) => (state.activeActor, state.currentHex) match {
+  scene.onPointerObservable.add((pi, es) => if (!selectBlock) (state.activeActor, state.currentHex) match {
     case (Player, Some((None, c))) if (pi.event.button<0) => pulse(c) // real unclaimed hex and player hovering over it on their turn
-    case (Player, Some((None, c))) => { stopPulse; state.claimHex(c)} // real unclaimed hex and player clicked in their turn
+    case (Player, Some((None, c))) if (firstClick(pi)) => { selectBlock = true; stopPulse; state.claimHex(c)} // real unclaimed hex and player clicked in their turn
     case _ => stopPulse // everything else 
   })
 }
+
+def firstClick(pi: BABYLON.PointerInfo) = pi.event.detail.map(_<1).getOrElse(true) && pi.event.`type`=="pointerdown"
 
 def displayText(text: String) = dom.document.getElementById("turn").innerHTML = text
 

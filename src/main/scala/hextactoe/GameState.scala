@@ -29,6 +29,8 @@ final case class GameState(val scene: BABYLON.Scene,
     activeActor.startTurn(this)
   }
 
+  def endActor = activeActor = Opponent
+
   def claimHex[C <: CoordSystem](c: Coord) = {
     grid.claim(activeActor, c)
     activeActor.createActorMarker(this, grid.toPixel(c), _ => {
@@ -36,11 +38,11 @@ final case class GameState(val scene: BABYLON.Scene,
           nextActor
         })
     })
-  } 
+  }
 
   def checkFinished[C <: CoordSystem](nextTurn: () => Unit) = grid.winner match {
-    case Some(_) => activeActor.endAction(this)
-    case None if grid.isDraw => { displayText("Draw &#x1F611;"); explode(scene) }
+    case Some(_) => { activeActor.endAction(this); endActor }
+    case None if grid.isDraw => { displayText("Draw &#x1F611;"); explode(scene); endActor }
     case _ => nextTurn()
   }
 }
