@@ -13,6 +13,10 @@ var selectBlock = false
 
 @main
 def HexTacToe(): Unit = { 
+  println("will it work")
+  new java.util.Timer().schedule(new java.util.TimerTask { def run() = println("java timers do!")}, 100)
+  scala.scalajs.js.timers.setTimeout(200)(println("js timers do!"))
+  
   val (scene, camera) = createScene()
   val state = GameState(scene, camera, BabylonGrid.build(scene, Dimensions.square(3), 0.75))
   displayText(state.activeActor.turnMsg)
